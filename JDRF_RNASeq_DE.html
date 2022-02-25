@@ -1,0 +1,10136 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Vincent Wong" />
+
+
+<title>JDRF : RNA-seq Analysis</title>
+
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">JDRF RNA-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Introduction</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE.html">Initial DE Analysis</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE_RUVseq.html">RUVseq DE</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE_S7_S6_removed.html">DE Analysis without S6 &amp; S7</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE_S7_S6_RUVseq.html">RUVseq DE without S6 &amp; S7</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">JDRF : RNA-seq Analysis</h1>
+<h3 class="subtitle">Initial Analysis with limma-voom</h3>
+<h4 class="author">Vincent Wong</h4>
+<h4 class="date">10 February, 2022</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2022-02-10
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>RNAseq/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version 1.7.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20220203code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20220203)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20220203code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20220203)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc12bc7e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> c12bc7e </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongc12bc7e" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version c12bc7e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
+
+Untracked files:
+    Untracked:  JDRF_RNASeq_DE.Rmd
+    Untracked:  JDRF_RNASeq_DE_S7_removed.Rmd
+    Untracked:  JDRF_counts.csv
+    Untracked:  RNA-seq(S1-S23)Deseq(coded)240122.xlsx
+    Untracked:  RNAseq(S1-S23)normalizedDeseq.xlsx
+    Untracked:  RNAseq(S1-S23)rawreads.xlsx
+    Untracked:  _site.yml
+    Untracked:  analysis/JDRF_RNASeq_DE.Rmd
+    Untracked:  analysis/JDRF_RNASeq_DE_RUVseq.Rmd
+    Untracked:  analysis/JDRF_RNASeq_DE_S7_S6_RUVseq.Rmd
+    Untracked:  analysis/JDRF_RNASeq_DE_S7_S6_removed.Rmd
+    Untracked:  data/RNAseq(S1-S23)rawreads.xlsx
+    Untracked:  data/dgeList.rds
+    Untracked:  data/dgeList_S6_S7.rds
+    Untracked:  data/sampleInfo.xlsx
+    Untracked:  data/samples.rds
+    Untracked:  data/topTables_efit.rds
+    Untracked:  data/topTables_efit_S6_S7.rds
+    Untracked:  data/topTables_tfit.rds
+    Untracked:  data/topTables_tfit_S6_S7.rds
+    Untracked:  figure/
+    Untracked:  sampleInfo.xlsx
+
+Unstaged changes:
+    Modified:   analysis/_site.yml
+    Deleted:    analysis/about.Rmd
+    Modified:   analysis/index.Rmd
+    Deleted:    analysis/license.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<p>First we load all the required <code>R</code> packages</p>
+<pre class="r"><code>library(here)
+library(pander)
+library(readxl)
+library(tidyverse)
+library(magrittr)
+library(AnnotationHub)
+library(ensembldb)
+library(ggpubr)
+library(reshape)
+library(edgeR)
+library(ggrepel)
+library(corrplot)
+library(ggplot2)
+library(scales)
+library(pheatmap)
+library(RColorBrewer)
+library(org.Hs.eg.db)
+library(kableExtra)</code></pre>
+<div id="annotations" class="section level2">
+<h2>Annotations</h2>
+<pre class="r"><code>ah &lt;- AnnotationHub() %&gt;%
+    subset(species == &quot;Homo sapiens&quot;) %&gt;%
+    subset(dataprovider == &quot;Ensembl&quot;) %&gt;%
+    subset(genome == &quot;GRCh38&quot;) %&gt;%
+    subset(rdataclass == &quot;EnsDb&quot;)
+ensDb &lt;- ah[[&quot;AH53211&quot;]]</code></pre>
+<pre class="r"><code>grGenes &lt;- genes(ensDb)</code></pre>
+</div>
+<div id="sample-information" class="section level2">
+<h2>Sample information</h2>
+<pre class="r"><code>samples &lt;- read_excel(here(&quot;data&quot;,&quot;sampleInfo.xlsx&quot;)) %&gt;%
+  mutate(
+    group = factor(group, levels = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;)))
+
+samples %&gt;% kable() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+sample
+</th>
+<th style="text-align:left;">
+group
+</th>
+<th style="text-align:left;">
+label
+</th>
+<th style="text-align:left;">
+original
+</th>
+<th style="text-align:left;">
+gender
+</th>
+<th style="text-align:right;">
+age
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+S14
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S14-A
+</td>
+<td style="text-align:left;">
+S14
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+67
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S15
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S15-A
+</td>
+<td style="text-align:left;">
+S15
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S16
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S16-A
+</td>
+<td style="text-align:left;">
+S16
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S4
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S4-A
+</td>
+<td style="text-align:left;">
+S4
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S11
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S11-A
+</td>
+<td style="text-align:left;">
+S11
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S8
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S8-A
+</td>
+<td style="text-align:left;">
+S8
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+52
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S7
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S7-A
+</td>
+<td style="text-align:left;">
+S7*
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+39
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S5
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S5-A
+</td>
+<td style="text-align:left;">
+S5
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+24
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S20
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S20-A
+</td>
+<td style="text-align:left;">
+S20
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+67
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S17
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S17-A
+</td>
+<td style="text-align:left;">
+S17
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S21
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S21-A
+</td>
+<td style="text-align:left;">
+S21
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+47
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S3
+</td>
+<td style="text-align:left;">
+A
+</td>
+<td style="text-align:left;">
+S3-A
+</td>
+<td style="text-align:left;">
+S3
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S19
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+S19-B
+</td>
+<td style="text-align:left;">
+S19
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S1
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+S1-B
+</td>
+<td style="text-align:left;">
+S1
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S2
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+S2-B
+</td>
+<td style="text-align:left;">
+S2*
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S9
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+S9-B
+</td>
+<td style="text-align:left;">
+S9*
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+66
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S10
+</td>
+<td style="text-align:left;">
+B
+</td>
+<td style="text-align:left;">
+S10-B
+</td>
+<td style="text-align:left;">
+S10
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+65
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S18
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+S18-C
+</td>
+<td style="text-align:left;">
+S18
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+59
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S12
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+S12-C
+</td>
+<td style="text-align:left;">
+S12
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+37
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S22
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+S22-C
+</td>
+<td style="text-align:left;">
+S22
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S6
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+S6-C
+</td>
+<td style="text-align:left;">
+S6
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+68
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S23
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+S23-C
+</td>
+<td style="text-align:left;">
+S23
+</td>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S13
+</td>
+<td style="text-align:left;">
+C
+</td>
+<td style="text-align:left;">
+S13-C
+</td>
+<td style="text-align:left;">
+S13
+</td>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+34
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="count-data" class="section level2">
+<h2>Count Data</h2>
+<p>Load the transcript count table and aggregate to gene level count</p>
+<pre class="r"><code>counts &lt;- read_excel(here(&quot;data&quot;,&quot;RNAseq(S1-S23)rawreads.xlsx&quot;)) %&gt;% column_to_rownames(&quot;Gene&quot;)%&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;gene_id&quot;) %&gt;%
+  gather(key = &quot;sample&quot;, value = &quot;Count&quot;, -gene_id) %&gt;%
+  dplyr::filter(Count &gt; 0) %&gt;%
+  left_join(grGenes[,c(&quot;gene_id&quot;, &quot;gene_name&quot;)] %&gt;%
+              mcols() %&gt;%
+              as.data.frame()) %&gt;%
+  group_by(gene_id, sample) %&gt;%
+  summarise(Count = sum(Count)) %&gt;%
+  spread(sample, Count, fill = 0) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(&quot;gene_id&quot;) </code></pre>
+</div>
+<div id="create-dgelist" class="section level2">
+<h2>Create DGEList</h2>
+<pre class="r"><code>minCPM &lt;- 1
+minSamples &lt;- 5
+
+dgeList &lt;- counts %&gt;%
+  .[rowSums(cpm(.) &gt;= minCPM) &gt;= minSamples,] %&gt;%
+  DGEList(
+    samples = tibble(sample = colnames(.)) %&gt;%
+      left_join(samples),
+    genes = tibble(gene_id = rownames(.)) %&gt;% left_join(grGenes %&gt;% as.data.frame() %&gt;%
+      dplyr::select(
+        chromosome = seqnames, start, end, 
+        gene_id, gene_name, gene_biotype, description, entrezid))) %&gt;%
+  # .[grepl(&quot;protein_coding&quot;, .$genes$gene_biotype),] %&gt;%
+  # .[!grepl(&quot;rRNA&quot;, .$genes$gene_biotype),] %&gt;%
+  # .[!grepl(&quot;lncRNA&quot;, .$genes$gene_biotype),] %&gt;%
+  calcNormFactors()</code></pre>
+</div>
+<div id="filtering-of-low-express-genes" class="section level2">
+<h2>Filtering of low-express genes</h2>
+<p>Count data as provided by Wilson, was loaded and formed into a <code>DGEList</code> object. During this process, genes were removed if:</p>
+<ul>
+<li><p>They were not considered as detectable (CPM &lt; 1 in at least 5 samples). This translates to &gt; 6 reads assigned a gene in all samples from one or more of the genotype groups</p></li>
+<li><p>These filtering steps returned counts for 24,845 genes from 54562`, with total library sizes between <em>5,941,544</em> and <em>35,843,953</em> reads assigned to genes.</p></li>
+</ul>
+<pre class="r"><code>keepTheseGenes &lt;- (rowSums(cpm(counts) &gt; minCPM) &gt;= minSamples) 
+
+## Compare the density distributions before and after filtering
+BeforeFilt &lt;- counts %&gt;%
+cpm(log = TRUE) %&gt;%
+  as.data.frame() %&gt;%
+  pivot_longer(
+    cols = everything(),
+    names_to = &quot;sample&quot;,
+    values_to = &quot;logCPM&quot;) %&gt;%
+  split(f = .$sample) %&gt;%
+  lapply(function(x){
+    d &lt;- density(x$logCPM)
+    tibble(sample = unique(x$sample),
+           x = d$x,y = d$y)}) %&gt;%
+  bind_rows() %&gt;%
+  left_join(samples) %&gt;%
+  ggplot(aes(x, y, colour = group, group = sample)) +
+  geom_line() +
+  ggtitle(&quot;A. Before filtering&quot;, subtitle = paste0(nrow(counts), &quot; genes&quot;)) +
+  scale_colour_manual(values =  brewer.pal(8,&quot;Set1&quot;)) + 
+  labs(x = &quot;logCPM&quot;, y = &quot;Density&quot;, colour = &quot;Group&quot;)
+
+AfterFilt&lt;-dgeList %&gt;%
+cpm(log = TRUE) %&gt;%
+  as.data.frame() %&gt;%
+  pivot_longer(
+    cols = everything(),
+    names_to = &quot;sample&quot;,
+    values_to = &quot;logCPM&quot;) %&gt;%
+  split(f = .$sample) %&gt;%
+  lapply(function(x){
+    d &lt;- density(x$logCPM)
+    tibble(sample = unique(x$sample),
+           x = d$x,y = d$y)}) %&gt;%
+  bind_rows() %&gt;%
+  left_join(samples) %&gt;%
+  ggplot(aes(x, y, colour = group, group = sample)) +
+  geom_line() +
+  ggtitle(&quot;B. After filtering&quot;, subtitle = paste0(table(keepTheseGenes)[[2]], &quot; genes&quot;))+
+  scale_colour_manual(values =  brewer.pal(8,&quot;Set1&quot;)) + 
+  labs(x = &quot;logCPM&quot;, y = &quot;Density&quot;, colour = &quot;Group&quot;)
+
+CPM_filter_plot &lt;- 
+  ggarrange(BeforeFilt, AfterFilt, 
+            common.legend = TRUE, legend = &quot;right&quot;)
+
+CPM_filter_plot</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/plotDensities-1.png" alt="*Expression density plots for all samples after filtering, showing logCPM values.*" width="960" />
+<p class="caption">
+<em>Expression density plots for all samples after filtering, showing logCPM values.</em>
+</p>
+</div>
+</div>
+<div id="library-size" class="section level2">
+<h2>Library size</h2>
+<pre class="r"><code>## Make libSize object
+libSize &lt;- dgeList$samples
+
+## Plot library sizes
+libSize %&gt;%  
+  ggplot(aes(sample, lib.size)) +
+  geom_bar(stat = &quot;identity&quot;, aes(fill = group)) +
+  geom_hline(
+        aes(yintercept = lib.size), 
+        data = . %&gt;% summarise_at(vars(lib.size), median),
+        linetype = 2) +
+    scale_y_continuous(expand = expand_scale(c(0, 0.05)), labels = comma) +
+  scale_fill_manual(values =  brewer.pal(8,&quot;Set1&quot;)) +
+  labs(x = &quot;Sample&quot;, y = &quot;Library size&quot;) +
+    facet_grid(~group, scales = &quot;free_x&quot;, space = &quot;free&quot;) +
+  labs(fill = &quot;group&quot;) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5), 
+        strip.text = element_text(face=&quot;bold&quot;))</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/plotLibSize-1.png" alt="*Library Sizes after removal of undetectable genes. Median library size is shown as the dashed line.*" width="672" />
+<p class="caption">
+<em>Library Sizes after removal of undetectable genes. Median library size is shown as the dashed line.</em>
+</p>
+</div>
+<p>This dataset retained 24,845 genes for DGE analysis.</p>
+</div>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<div id="pca" class="section level2">
+<h2>PCA</h2>
+<div id="annotate-group-on-pca" class="section level3">
+<h3>Annotate group on PCA</h3>
+<p>PCA: Project a multi-dimensional space onto the directions of maximum variability</p>
+<pre class="r"><code>pca &lt;- dgeList %&gt;%
+  cpm(log = TRUE) %&gt;%
+  t() %&gt;%
+  prcomp() 
+pcaVars &lt;- percent_format(0.1)(summary(pca)$importance[&quot;Proportion of Variance&quot;,])</code></pre>
+<pre class="r"><code>pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=4.4, show.legend = FALSE, max.overlaps =30) +
+  # stat_ellipse(geom = &quot;polygon&quot;, alpha = 0.1, show.legend = FALSE, aes(fill=group)) +
+  #scale_shape_manual(values=c(15,11,19,17))+ #change shape
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-1-1.png" alt="*PCA 1 &amp; 2 of gene-level counts.*" width="672" />
+<p class="caption">
+<em>PCA 1 &amp; 2 of gene-level counts.</em>
+</p>
+</div>
+<p>As clustering by group is not evident in the initial PC1 vs PC2, I then plot PC2 vs PC3 and PC3 vs PC4. However, there is still no observed clustering.</p>
+</div>
+<div id="annotate-gender-on-pca" class="section level3">
+<h3>Annotate gender on PCA</h3>
+<pre class="r"><code>pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = gender)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=4.4, show.legend = FALSE, max.overlaps =30) +
+  # stat_ellipse(geom = &quot;polygon&quot;, alpha = 0.1, show.legend = FALSE, aes(fill=group)) +
+  #scale_shape_manual(values=c(15,11,19,17))+ #change shape
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set2&quot;)) +
+  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-2-1.png" alt="*Annotated Gender on PCA 1 &amp; 2.*" width="672" />
+<p class="caption">
+<em>Annotated Gender on PCA 1 &amp; 2.</em>
+</p>
+</div>
+</div>
+<div id="annotate-age-on-pca" class="section level3">
+<h3>Annotate age on PCA</h3>
+<pre class="r"><code>pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = age)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=4.4, show.legend = FALSE, max.overlaps =30) +
+  # stat_ellipse(geom = &quot;polygon&quot;, alpha = 0.1, show.legend = FALSE, aes(fill=group)) +
+  #scale_shape_manual(values=c(15,11,19,17))+ #change shape
+  scale_color_gradient(low = &quot;orange&quot;,  high = &quot;mediumblue&quot;, space = &quot;Lab&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-3-1.png" alt="*Annotated age on PCA 1 &amp; 2.*" width="672" />
+<p class="caption">
+<em>Annotated age on PCA 1 &amp; 2.</em>
+</p>
+</div>
+<pre class="r"><code>  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)</code></pre>
+<pre><code>$x
+[1] &quot;PC1 (28.4%)&quot;
+
+$y
+[1] &quot;PC2 (11.5%)&quot;
+
+$colour
+[1] &quot;Group&quot;
+
+attr(,&quot;class&quot;)
+[1] &quot;labels&quot;</code></pre>
+</div>
+<div id="annotate-group-on-pca1-4" class="section level3">
+<h3>Annotate group on PCA1-4</h3>
+<pre class="r"><code>pca12 &lt;-pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=3.5, show.legend = FALSE, max.overlaps =30) +
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;) 
+
+pca23 &lt;-pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC2, PC3) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC2, y=PC3, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=3.5, show.legend = FALSE, max.overlaps =30) +
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC3 (&quot;, pcaVars[[&quot;PC3&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)
+
+pca34 &lt;-pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC3, PC4) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC3, y=PC4, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=3.5, show.legend = FALSE, max.overlaps =30) +
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC3 (&quot;, pcaVars[[&quot;PC3&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC4 (&quot;, pcaVars[[&quot;PC4&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)
+
+pca1_4_plot &lt;- ggarrange(pca12, pca23, pca34,
+            common.legend = TRUE, legend = &quot;right&quot;, max.overlaps =100)
+
+pca1_4_plot</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-4-1.png" alt="*PCA 1-4 of gene.*" width="672" />
+<p class="caption">
+<em>PCA 1-4 of gene.</em>
+</p>
+</div>
+<p>A Principal Component Analysis (PCA) was performed using logCPM values from each sample. Samples do not appears to cluster together based on group.</p>
+</div>
+<div id="annotate-gender-on-pca1-4" class="section level3">
+<h3>Annotate gender on PCA1-4</h3>
+<p><img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="annotate-age-on-pca1-4" class="section level3">
+<h3>Annotate age on PCA1-4</h3>
+<p><img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="sample-correlation-plot" class="section level2">
+<h2>Sample Correlation Plot</h2>
+<pre class="r"><code>pca$x %&gt;% set_rownames(dgeList$samples$label) %&gt;% 
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  cor() %&gt;% 
+  # .[1:20,1:20] %&gt;%
+    corrplot(method = &quot;color&quot;, order=&quot;AOE&quot;)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /> Correlation plot shows two distinct groups, require additional information to determine how groups were clustered (eg: age, gender, severity of disease)</p>
+</div>
+</div>
+<div id="differential-gene-expression" class="section level1">
+<h1>Differential Gene Expression</h1>
+<div id="creating-a-design-matrix-and-contrasts" class="section level2">
+<h2>Creating a design matrix and contrasts</h2>
+<pre class="r"><code>design &lt;- model.matrix(~0+group+gender+age, data=dgeList$samples)%&gt;%
+  set_colnames(str_remove(colnames(.), &quot;group&quot;))</code></pre>
+<pre class="r"><code>contr.matrix &lt;- makeContrasts(
+   AvsB = B-A, 
+   BvsC = C-B, 
+   AvsC = C-A,
+   levels = colnames(design))
+contr.matrix</code></pre>
+<pre><code>         Contrasts
+Levels    AvsB BvsC AvsC
+  A         -1    0   -1
+  B          1   -1    0
+  C          0    1    1
+  genderM    0    0    0
+  age        0    0    0</code></pre>
+<pre class="r"><code>pheatmap(
+  design[,c(1:3)], 
+  cluster_cols = FALSE, 
+  cluster_rows = TRUE, 
+  color = c(&quot;white&quot;, &quot;grey50&quot;),
+  annotation_row = dgeList$samples[&quot;group&quot;],
+  annotation_colors = list(condition = brewer.pal(8,&quot;Set1&quot;)),
+  legend = FALSE
+)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="estimation-of-sample-weights" class="section level2">
+<h2>Estimation of sample weights</h2>
+<p>The approach taken for DGE analysis was to use voom-precision weights in order to allow for modelling using Normally distributed data. Since there were no covariates to my model matrix and initial PCA looks like there is sample heterogeneity I decided to run <code>voomWithQualityWeights</code> to incorporate sample-level weights. Sample-level weights were estimated as part of this process, with all samples normally being considered as belonging to the same treatment group, to allow more conservative estimates.</p>
+<pre class="r"><code>#Sample weights after voom transformation
+v &lt;- voomWithQualityWeights(dgeList, design=design, plot=FALSE)</code></pre>
+<p>Means (x-axis) and variances (y-axis) of each gene are plotted to show the dependence between the two before voom is applied to the data (left panel) and how the trend is removed after voom precision weights are applied to the data (right panel)</p>
+<pre class="r"><code>par(mfrow=c(1,2))
+v2 &lt;- voom(dgeList, design, plot=TRUE)
+v2fit &lt;-lmFit(v2, design)
+e2fit &lt;-eBayes(v2fit)
+plotSA(e2fit, main=&quot;Final model: Mean-variance trend&quot;)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Sample weights after voom transformation</p>
+<pre class="r"><code>targets &lt;-v$targets
+targets$label &lt;- factor(
+  targets$label, 
+  levels = targets %&gt;% 
+    dplyr::arrange(samples, label) %&gt;% 
+    .$label)
+
+targets %&gt;% 
+    ggplot(aes(label, sample.weights)) +
+    geom_bar(stat = &quot;identity&quot;, aes(fill=group)) +
+    geom_hline(yintercept = 1, linetype = 2, colour = &quot;grey50&quot;) +
+    scale_y_continuous(expand = expand_scale(c(0, 0.05))) +
+    scale_fill_manual(values = brewer.pal(8,&quot;Set1&quot;)) +
+    facet_grid(~ group, scales = &quot;free_x&quot;, space=&quot;free&quot;) +
+    labs(x = &quot;Sample&quot;, y = &quot;Sample Weight&quot;, fill = &quot;Group&quot;) +
+    theme(axis.text.x = element_text(angle = 90),
+          strip.text = element_text(face=&quot;bold&quot;))</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE.Rmd/plotWeights-1.png" alt="*Sample weights after voom transformation. The idealised equal weighting of $w = 1$ is shown as the dashed line.*" width="672" />
+<p class="caption">
+<em>Sample weights after voom transformation. The idealised equal weighting of <span class="math inline">\(w = 1\)</span> is shown as the dashed line.</em>
+</p>
+</div>
+</div>
+<div id="strict-comparison-between-groups" class="section level2">
+<h2>Strict Comparison between groups</h2>
+<pre class="r"><code>tau &lt;- log2(1.1) #less stringent here</code></pre>
+<p>For the comparison between groups, a null hypothesis was tested using a range of values, instead of the point value zero, i.e.</p>
+<p><span class="math display">\[
+H_0: -\tau &lt; \Delta \mu &lt; \tau  \\
+Vs.  \\
+H_A: | \Delta \mu | &gt; \tau
+\]</span></p>
+<p>The default value used in the function <code>treat()</code> is <span class="math inline">\(\tau = \log_2 1.2\)</span> and for this analysis, <span class="math inline">\(\tau = \log_2 1.1\)</span> was chosen as a suitable value.</p>
+<pre class="r"><code>alpha &lt;- 0.05
+
+tfit &lt;- lmFit(v,design) %&gt;% 
+  contrasts.fit(contr.matrix) %&gt;%
+  treat(lfc = tau)
+
+efit &lt;- lmFit(v,design) %&gt;% 
+  contrasts.fit(contr.matrix) %&gt;%
+  eBayes()</code></pre>
+<p>This gave the number of genes considered as DE between the comparison groups with Bonferroni adjusted P-value &lt; 0.05.</p>
+<pre class="r"><code>summary(decideTests(tfit))</code></pre>
+<pre><code>        AvsB  BvsC  AvsC
+Down       0     0     1
+NotSig 24845 24845 24844
+Up         0     0     0</code></pre>
+<p>For a less strict definition on significance, requirement of log-fold-changes is removed and uses empirical Bayes moderated t-statistics but there were still no DE</p>
+<pre class="r"><code>summary(decideTests(efit))</code></pre>
+<pre><code>        AvsB  BvsC  AvsC
+Down       0     0     1
+NotSig 24845 24845 24844
+Up         0     0     0</code></pre>
+</div>
+<div id="top-de-genes-without-lfc-cutoff" class="section level2">
+<h2>Top DE genes without lfc cutoff</h2>
+<pre class="r"><code>topTables_efit &lt;- colnames(contr.matrix) %&gt;%
+  sapply(function(x){
+  topTreat(efit, coef = x, n = Inf) %&gt;%
+      as_tibble() %&gt;%
+      rownames_to_column(&quot;No.&quot;) %&gt;%
+      arrange(P.Value) %&gt;% 
+      mutate(DE= adj.P.Val &lt; alpha,
+             Status = case_when(
+      DE ==TRUE &amp; logFC &lt; 0 ~ &quot;Down&quot;,
+      DE == TRUE &amp; logFC &gt; 0 ~ &quot;Up&quot;),
+      Status = ifelse(is.na(Status), &quot;NotSig&quot;, Status))}, simplify = FALSE)</code></pre>
+<pre class="r"><code>names(topTables_efit) %&gt;%
+  sapply(function(x){
+    topTables_efit[[x]] %&gt;%
+      head(50) %&gt;%
+      dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% 
+      kable(caption=x) %&gt;%
+      kable_styling() %&gt;%
+      scroll_box(height=&quot;500px&quot;)}, simplify = FALSE)</code></pre>
+$AvsB
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+AvsB
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+ESPN
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2337703
+</td>
+<td style="text-align:right;">
+2.0581126
+</td>
+<td style="text-align:right;">
+0.0000354
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DPY19L1P1
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+2.2088421
+</td>
+<td style="text-align:right;">
+1.5925441
+</td>
+<td style="text-align:right;">
+0.0000480
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ORMDL1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4799990
+</td>
+<td style="text-align:right;">
+6.4840579
+</td>
+<td style="text-align:right;">
+0.0000588
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEPRO
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5444664
+</td>
+<td style="text-align:right;">
+6.0950965
+</td>
+<td style="text-align:right;">
+0.0000606
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MICAL1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.3810421
+</td>
+<td style="text-align:right;">
+7.1418600
+</td>
+<td style="text-align:right;">
+0.0001061
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCARNA10
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-0.6472095
+</td>
+<td style="text-align:right;">
+8.2371315
+</td>
+<td style="text-align:right;">
+0.0001113
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TMEM243
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4674560
+</td>
+<td style="text-align:right;">
+6.8358284
+</td>
+<td style="text-align:right;">
+0.0001135
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CNOT7
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4457147
+</td>
+<td style="text-align:right;">
+6.9672294
+</td>
+<td style="text-align:right;">
+0.0001293
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BCCIP
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4834606
+</td>
+<td style="text-align:right;">
+5.7090204
+</td>
+<td style="text-align:right;">
+0.0001363
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+METTL7A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8025411
+</td>
+<td style="text-align:right;">
+4.5090614
+</td>
+<td style="text-align:right;">
+0.0001366
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TRAT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4722242
+</td>
+<td style="text-align:right;">
+6.7433054
+</td>
+<td style="text-align:right;">
+0.0001490
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BCL2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5410658
+</td>
+<td style="text-align:right;">
+7.7224171
+</td>
+<td style="text-align:right;">
+0.0001682
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PIGQ
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.6103278
+</td>
+<td style="text-align:right;">
+3.7674732
+</td>
+<td style="text-align:right;">
+0.0001725
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PLD3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4926712
+</td>
+<td style="text-align:right;">
+5.1505008
+</td>
+<td style="text-align:right;">
+0.0001731
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NUCB2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4688186
+</td>
+<td style="text-align:right;">
+4.9024404
+</td>
+<td style="text-align:right;">
+0.0001798
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC36A4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.6602473
+</td>
+<td style="text-align:right;">
+4.3916353
+</td>
+<td style="text-align:right;">
+0.0001836
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MYO18A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4770070
+</td>
+<td style="text-align:right;">
+7.0151291
+</td>
+<td style="text-align:right;">
+0.0001918
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF22
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9285786
+</td>
+<td style="text-align:right;">
+2.4237185
+</td>
+<td style="text-align:right;">
+0.0002144
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BRD9P2
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.2062971
+</td>
+<td style="text-align:right;">
+1.2519444
+</td>
+<td style="text-align:right;">
+0.0002191
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GMFB
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5054061
+</td>
+<td style="text-align:right;">
+6.1155985
+</td>
+<td style="text-align:right;">
+0.0002214
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANK1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.1155738
+</td>
+<td style="text-align:right;">
+4.1238565
+</td>
+<td style="text-align:right;">
+0.0002228
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PANK3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3569221
+</td>
+<td style="text-align:right;">
+6.7830722
+</td>
+<td style="text-align:right;">
+0.0002230
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+C5orf24
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4501128
+</td>
+<td style="text-align:right;">
+5.5906051
+</td>
+<td style="text-align:right;">
+0.0002261
+</td>
+<td style="text-align:right;">
+0.2442807
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SOCS4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4405081
+</td>
+<td style="text-align:right;">
+5.9678807
+</td>
+<td style="text-align:right;">
+0.0002548
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TDG
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5164290
+</td>
+<td style="text-align:right;">
+5.9904456
+</td>
+<td style="text-align:right;">
+0.0002708
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANKRD18EP
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-0.7404960
+</td>
+<td style="text-align:right;">
+3.5519961
+</td>
+<td style="text-align:right;">
+0.0002832
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MCF2L2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.5786117
+</td>
+<td style="text-align:right;">
+7.1367302
+</td>
+<td style="text-align:right;">
+0.0002861
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PDE4A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.1959911
+</td>
+<td style="text-align:right;">
+4.6683854
+</td>
+<td style="text-align:right;">
+0.0002906
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EGR1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.9020845
+</td>
+<td style="text-align:right;">
+3.7789092
+</td>
+<td style="text-align:right;">
+0.0003040
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC25A36
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3487811
+</td>
+<td style="text-align:right;">
+7.7361421
+</td>
+<td style="text-align:right;">
+0.0003123
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+XXYLT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.9727566
+</td>
+<td style="text-align:right;">
+3.6161985
+</td>
+<td style="text-align:right;">
+0.0003124
+</td>
+<td style="text-align:right;">
+0.2503865
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PKD2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9153586
+</td>
+<td style="text-align:right;">
+4.0646132
+</td>
+<td style="text-align:right;">
+0.0003635
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CEP131
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8477435
+</td>
+<td style="text-align:right;">
+2.4763065
+</td>
+<td style="text-align:right;">
+0.0004000
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PNISR
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.2683814
+</td>
+<td style="text-align:right;">
+8.5463535
+</td>
+<td style="text-align:right;">
+0.0004162
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ATP5J
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2114779
+</td>
+<td style="text-align:right;">
+1.9341301
+</td>
+<td style="text-align:right;">
+0.0004279
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LSM5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8618352
+</td>
+<td style="text-align:right;">
+3.2682984
+</td>
+<td style="text-align:right;">
+0.0004310
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP4-583P15.14
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-3.0262081
+</td>
+<td style="text-align:right;">
+2.5677550
+</td>
+<td style="text-align:right;">
+0.0004335
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-1379J22.5
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-2.7946824
+</td>
+<td style="text-align:right;">
+-0.5243250
+</td>
+<td style="text-align:right;">
+0.0004373
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P9
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.5980787
+</td>
+<td style="text-align:right;">
+4.5548393
+</td>
+<td style="text-align:right;">
+0.0004412
+</td>
+<td style="text-align:right;">
+0.2810801
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ACAD8
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5808026
+</td>
+<td style="text-align:right;">
+5.0799698
+</td>
+<td style="text-align:right;">
+0.0005175
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZRANB2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3891144
+</td>
+<td style="text-align:right;">
+7.3707226
+</td>
+<td style="text-align:right;">
+0.0005645
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PYROXD1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3831322
+</td>
+<td style="text-align:right;">
+6.5071063
+</td>
+<td style="text-align:right;">
+0.0005682
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GDPD5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8371269
+</td>
+<td style="text-align:right;">
+5.9153040
+</td>
+<td style="text-align:right;">
+0.0005839
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ATP5G2P3
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-0.8163916
+</td>
+<td style="text-align:right;">
+2.7828224
+</td>
+<td style="text-align:right;">
+0.0006171
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SNHG1
+</td>
+<td style="text-align:left;">
+processed_transcript
+</td>
+<td style="text-align:right;">
+-0.3839323
+</td>
+<td style="text-align:right;">
+7.3501638
+</td>
+<td style="text-align:right;">
+0.0006262
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AP5M1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3235186
+</td>
+<td style="text-align:right;">
+6.9094415
+</td>
+<td style="text-align:right;">
+0.0006346
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF532
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.6382321
+</td>
+<td style="text-align:right;">
+5.6263833
+</td>
+<td style="text-align:right;">
+0.0006414
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-264F23.1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.7929168
+</td>
+<td style="text-align:right;">
+-0.7520049
+</td>
+<td style="text-align:right;">
+0.0006541
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC38A8
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.1202928
+</td>
+<td style="text-align:right;">
+0.7937544
+</td>
+<td style="text-align:right;">
+0.0006648
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WISP3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0171619
+</td>
+<td style="text-align:right;">
+1.3977560
+</td>
+<td style="text-align:right;">
+0.0006930
+</td>
+<td style="text-align:right;">
+0.3145218
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+$BvsC
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+BvsC
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+AC068831.15
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.1087730
+</td>
+<td style="text-align:right;">
+2.1766129
+</td>
+<td style="text-align:right;">
+0.0000250
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HLA-J
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.7293160
+</td>
+<td style="text-align:right;">
+2.5753352
+</td>
+<td style="text-align:right;">
+0.0000371
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TRAT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.5498945
+</td>
+<td style="text-align:right;">
+6.7433054
+</td>
+<td style="text-align:right;">
+0.0000693
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CTD-2532D12.4
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-3.8610675
+</td>
+<td style="text-align:right;">
+-1.2506540
+</td>
+<td style="text-align:right;">
+0.0000921
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NAPRT
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-2.1788602
+</td>
+<td style="text-align:right;">
+2.4714416
+</td>
+<td style="text-align:right;">
+0.0000932
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIAP2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-3.1910609
+</td>
+<td style="text-align:right;">
+-1.0864749
+</td>
+<td style="text-align:right;">
+0.0001009
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIP5K1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.7340516
+</td>
+<td style="text-align:right;">
+3.6838756
+</td>
+<td style="text-align:right;">
+0.0001170
+</td>
+<td style="text-align:right;">
+0.4154240
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WISP3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2266690
+</td>
+<td style="text-align:right;">
+1.3977560
+</td>
+<td style="text-align:right;">
+0.0002119
+</td>
+<td style="text-align:right;">
+0.6580256
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-493L12.5
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-2.7907177
+</td>
+<td style="text-align:right;">
+0.1646672
+</td>
+<td style="text-align:right;">
+0.0002422
+</td>
+<td style="text-align:right;">
+0.6604216
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PID1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2454684
+</td>
+<td style="text-align:right;">
+5.4272463
+</td>
+<td style="text-align:right;">
+0.0002764
+</td>
+<td style="text-align:right;">
+0.6604216
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WDSUB1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.4142559
+</td>
+<td style="text-align:right;">
+2.4128676
+</td>
+<td style="text-align:right;">
+0.0002924
+</td>
+<td style="text-align:right;">
+0.6604216
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+C4orf50
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.6836984
+</td>
+<td style="text-align:right;">
+2.4750962
+</td>
+<td style="text-align:right;">
+0.0003375
+</td>
+<td style="text-align:right;">
+0.6988113
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC093166.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.3428945
+</td>
+<td style="text-align:right;">
+-0.2055705
+</td>
+<td style="text-align:right;">
+0.0003744
+</td>
+<td style="text-align:right;">
+0.7156055
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP4-583P15.14
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+3.1614588
+</td>
+<td style="text-align:right;">
+2.5677550
+</td>
+<td style="text-align:right;">
+0.0004199
+</td>
+<td style="text-align:right;">
+0.7450868
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC7A11-AS1
+</td>
+<td style="text-align:left;">
+processed_transcript
+</td>
+<td style="text-align:right;">
+-1.1592804
+</td>
+<td style="text-align:right;">
+1.2472938
+</td>
+<td style="text-align:right;">
+0.0006929
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AP3M2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4584444
+</td>
+<td style="text-align:right;">
+7.1200017
+</td>
+<td style="text-align:right;">
+0.0007451
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HSD17B7P2
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.8583815
+</td>
+<td style="text-align:right;">
+1.9117509
+</td>
+<td style="text-align:right;">
+0.0008100
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P9
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.6081373
+</td>
+<td style="text-align:right;">
+4.5548393
+</td>
+<td style="text-align:right;">
+0.0008333
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-295I5.3
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+1.8401289
+</td>
+<td style="text-align:right;">
+0.6380078
+</td>
+<td style="text-align:right;">
+0.0008367
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIRE
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9570654
+</td>
+<td style="text-align:right;">
+1.7437442
+</td>
+<td style="text-align:right;">
+0.0008620
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EGR1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.9035949
+</td>
+<td style="text-align:right;">
+3.7789092
+</td>
+<td style="text-align:right;">
+0.0008952
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FAM60A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4952439
+</td>
+<td style="text-align:right;">
+6.8083878
+</td>
+<td style="text-align:right;">
+0.0009593
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P7
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+2.7087129
+</td>
+<td style="text-align:right;">
+0.3812383
+</td>
+<td style="text-align:right;">
+0.0010081
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BTNL10
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-3.1698723
+</td>
+<td style="text-align:right;">
+-1.0400720
+</td>
+<td style="text-align:right;">
+0.0010378
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TWF1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.3988275
+</td>
+<td style="text-align:right;">
+6.1425132
+</td>
+<td style="text-align:right;">
+0.0010489
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LRRC37A17P
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.0471489
+</td>
+<td style="text-align:right;">
+3.4099457
+</td>
+<td style="text-align:right;">
+0.0011226
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RAD51C
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3728426
+</td>
+<td style="text-align:right;">
+4.6491987
+</td>
+<td style="text-align:right;">
+0.0011576
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANK1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0400248
+</td>
+<td style="text-align:right;">
+4.1238565
+</td>
+<td style="text-align:right;">
+0.0011706
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FTOP1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.7418763
+</td>
+<td style="text-align:right;">
+-0.9165538
+</td>
+<td style="text-align:right;">
+0.0011887
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAGED4B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-2.1402896
+</td>
+<td style="text-align:right;">
+0.0426959
+</td>
+<td style="text-align:right;">
+0.0012000
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+JAZF1-AS1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-0.7135784
+</td>
+<td style="text-align:right;">
+2.6438555
+</td>
+<td style="text-align:right;">
+0.0012077
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SKIDA1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.7923631
+</td>
+<td style="text-align:right;">
+3.6957694
+</td>
+<td style="text-align:right;">
+0.0012491
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-214N16.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.2864526
+</td>
+<td style="text-align:right;">
+2.8680325
+</td>
+<td style="text-align:right;">
+0.0012596
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EIF2D
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.3895000
+</td>
+<td style="text-align:right;">
+5.9339634
+</td>
+<td style="text-align:right;">
+0.0012790
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ESRRA
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.7034706
+</td>
+<td style="text-align:right;">
+2.9996603
+</td>
+<td style="text-align:right;">
+0.0013243
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BRD9P2
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.1110041
+</td>
+<td style="text-align:right;">
+1.2519444
+</td>
+<td style="text-align:right;">
+0.0013580
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GRAMD1B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8065017
+</td>
+<td style="text-align:right;">
+5.2570400
+</td>
+<td style="text-align:right;">
+0.0014222
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+UNC13A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0721751
+</td>
+<td style="text-align:right;">
+1.5934061
+</td>
+<td style="text-align:right;">
+0.0014592
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TMEM243
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.3984300
+</td>
+<td style="text-align:right;">
+6.8358284
+</td>
+<td style="text-align:right;">
+0.0014600
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-643A5.3
+</td>
+<td style="text-align:left;">
+TEC
+</td>
+<td style="text-align:right;">
+-2.0199105
+</td>
+<td style="text-align:right;">
+-0.2864969
+</td>
+<td style="text-align:right;">
+0.0015996
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+KAT5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4593851
+</td>
+<td style="text-align:right;">
+4.6517887
+</td>
+<td style="text-align:right;">
+0.0016417
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GDPD5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8220903
+</td>
+<td style="text-align:right;">
+5.9153040
+</td>
+<td style="text-align:right;">
+0.0016550
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-107K17.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+3.5941614
+</td>
+<td style="text-align:right;">
+-1.1831307
+</td>
+<td style="text-align:right;">
+0.0016811
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NLRP2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.8817821
+</td>
+<td style="text-align:right;">
+2.8787361
+</td>
+<td style="text-align:right;">
+0.0016909
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-123C21.3
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.4976737
+</td>
+<td style="text-align:right;">
+0.8790597
+</td>
+<td style="text-align:right;">
+0.0017076
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PRCP
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.6138721
+</td>
+<td style="text-align:right;">
+4.4013372
+</td>
+<td style="text-align:right;">
+0.0017261
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC25A36
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.3194706
+</td>
+<td style="text-align:right;">
+7.7361421
+</td>
+<td style="text-align:right;">
+0.0017485
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP1-224A6.8
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+0.9151154
+</td>
+<td style="text-align:right;">
+2.3123281
+</td>
+<td style="text-align:right;">
+0.0018041
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-180C16.1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.2301174
+</td>
+<td style="text-align:right;">
+2.5781492
+</td>
+<td style="text-align:right;">
+0.0018605
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IKZF4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8234964
+</td>
+<td style="text-align:right;">
+4.4205127
+</td>
+<td style="text-align:right;">
+0.0019168
+</td>
+<td style="text-align:right;">
+0.8117435
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+$AvsC
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+AvsC
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+WDSUB1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.8757306
+</td>
+<td style="text-align:right;">
+2.4128676
+</td>
+<td style="text-align:right;">
+0.0000003
+</td>
+<td style="text-align:right;">
+0.0072439
+</td>
+<td style="text-align:left;">
+Down
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+UST
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2070426
+</td>
+<td style="text-align:right;">
+4.2534374
+</td>
+<td style="text-align:right;">
+0.0000320
+</td>
+<td style="text-align:right;">
+0.3969701
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIAP2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.8360414
+</td>
+<td style="text-align:right;">
+-1.0864749
+</td>
+<td style="text-align:right;">
+0.0000847
+</td>
+<td style="text-align:right;">
+0.5447237
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+KRT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-4.1498548
+</td>
+<td style="text-align:right;">
+-3.2540461
+</td>
+<td style="text-align:right;">
+0.0001075
+</td>
+<td style="text-align:right;">
+0.5447237
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCARNA10
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-0.5464758
+</td>
+<td style="text-align:right;">
+8.2371315
+</td>
+<td style="text-align:right;">
+0.0001096
+</td>
+<td style="text-align:right;">
+0.5447237
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ADTRP
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.1575290
+</td>
+<td style="text-align:right;">
+4.8414121
+</td>
+<td style="text-align:right;">
+0.0001356
+</td>
+<td style="text-align:right;">
+0.5465714
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEX101
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-2.2707491
+</td>
+<td style="text-align:right;">
+0.6196209
+</td>
+<td style="text-align:right;">
+0.0001839
+</td>
+<td style="text-align:right;">
+0.5465714
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LPAR5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.7904368
+</td>
+<td style="text-align:right;">
+3.1022353
+</td>
+<td style="text-align:right;">
+0.0001884
+</td>
+<td style="text-align:right;">
+0.5465714
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEPRO
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4060475
+</td>
+<td style="text-align:right;">
+6.0950965
+</td>
+<td style="text-align:right;">
+0.0001980
+</td>
+<td style="text-align:right;">
+0.5465714
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SNORA67
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-1.3289885
+</td>
+<td style="text-align:right;">
+2.3126805
+</td>
+<td style="text-align:right;">
+0.0002770
+</td>
+<td style="text-align:right;">
+0.6880926
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+UPK3BL
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8962328
+</td>
+<td style="text-align:right;">
+3.2205936
+</td>
+<td style="text-align:right;">
+0.0003961
+</td>
+<td style="text-align:right;">
+0.7866917
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZDHHC11B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.4073365
+</td>
+<td style="text-align:right;">
+2.3770322
+</td>
+<td style="text-align:right;">
+0.0004228
+</td>
+<td style="text-align:right;">
+0.7866917
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ORC2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.2937258
+</td>
+<td style="text-align:right;">
+5.4238867
+</td>
+<td style="text-align:right;">
+0.0004228
+</td>
+<td style="text-align:right;">
+0.7866917
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PRKCB
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4122537
+</td>
+<td style="text-align:right;">
+7.1939676
+</td>
+<td style="text-align:right;">
+0.0004510
+</td>
+<td style="text-align:right;">
+0.7866917
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-577H5.5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.7209226
+</td>
+<td style="text-align:right;">
+3.6360259
+</td>
+<td style="text-align:right;">
+0.0004947
+</td>
+<td style="text-align:right;">
+0.7866917
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CCDC142
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3825098
+</td>
+<td style="text-align:right;">
+4.6954021
+</td>
+<td style="text-align:right;">
+0.0005066
+</td>
+<td style="text-align:right;">
+0.7866917
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC006129.2
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-0.4259278
+</td>
+<td style="text-align:right;">
+4.2661811
+</td>
+<td style="text-align:right;">
+0.0006047
+</td>
+<td style="text-align:right;">
+0.8408184
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TBL1X
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.2709008
+</td>
+<td style="text-align:right;">
+7.1927512
+</td>
+<td style="text-align:right;">
+0.0006092
+</td>
+<td style="text-align:right;">
+0.8408184
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NAPRT
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.5710054
+</td>
+<td style="text-align:right;">
+2.4714416
+</td>
+<td style="text-align:right;">
+0.0006970
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-252K23.2
+</td>
+<td style="text-align:left;">
+sense_intronic
+</td>
+<td style="text-align:right;">
+1.0834826
+</td>
+<td style="text-align:right;">
+0.7097214
+</td>
+<td style="text-align:right;">
+0.0007193
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF22
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.6078324
+</td>
+<td style="text-align:right;">
+2.4237185
+</td>
+<td style="text-align:right;">
+0.0007838
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF185
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.0224049
+</td>
+<td style="text-align:right;">
+1.3389113
+</td>
+<td style="text-align:right;">
+0.0008076
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MTRNR2L4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8636719
+</td>
+<td style="text-align:right;">
+1.7975499
+</td>
+<td style="text-align:right;">
+0.0008950
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CTD-2532D12.4
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-2.6120021
+</td>
+<td style="text-align:right;">
+-1.2506540
+</td>
+<td style="text-align:right;">
+0.0009969
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP1-122K4.3
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-0.7829633
+</td>
+<td style="text-align:right;">
+1.9653218
+</td>
+<td style="text-align:right;">
+0.0010536
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-493L12.5
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-2.0830719
+</td>
+<td style="text-align:right;">
+0.1646672
+</td>
+<td style="text-align:right;">
+0.0011239
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC010970.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.2359201
+</td>
+<td style="text-align:right;">
+12.0154706
+</td>
+<td style="text-align:right;">
+0.0011280
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ERCC6L2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.2449675
+</td>
+<td style="text-align:right;">
+6.4180876
+</td>
+<td style="text-align:right;">
+0.0011662
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HCG25
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-0.7524250
+</td>
+<td style="text-align:right;">
+1.7570815
+</td>
+<td style="text-align:right;">
+0.0011728
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NUTM2A-AS1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-0.4220398
+</td>
+<td style="text-align:right;">
+6.3217387
+</td>
+<td style="text-align:right;">
+0.0012150
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHCHD1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2912075
+</td>
+<td style="text-align:right;">
+0.4008198
+</td>
+<td style="text-align:right;">
+0.0012192
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MPHOSPH6
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5535417
+</td>
+<td style="text-align:right;">
+3.6751800
+</td>
+<td style="text-align:right;">
+0.0012439
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+APCDD1L
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2408095
+</td>
+<td style="text-align:right;">
+0.0047128
+</td>
+<td style="text-align:right;">
+0.0012661
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+B4GALT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4391682
+</td>
+<td style="text-align:right;">
+6.7761176
+</td>
+<td style="text-align:right;">
+0.0012693
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5_8S_rRNA
+</td>
+<td style="text-align:left;">
+rRNA
+</td>
+<td style="text-align:right;">
+-1.3281074
+</td>
+<td style="text-align:right;">
+1.3995946
+</td>
+<td style="text-align:right;">
+0.0012743
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC104820.2
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+0.8620518
+</td>
+<td style="text-align:right;">
+4.6882823
+</td>
+<td style="text-align:right;">
+0.0012801
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PYGO1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9593260
+</td>
+<td style="text-align:right;">
+0.8025849
+</td>
+<td style="text-align:right;">
+0.0012943
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VSNL1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0222453
+</td>
+<td style="text-align:right;">
+1.2824380
+</td>
+<td style="text-align:right;">
+0.0013270
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF419
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.3211657
+</td>
+<td style="text-align:right;">
+4.2865146
+</td>
+<td style="text-align:right;">
+0.0013302
+</td>
+<td style="text-align:right;">
+0.8474069
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TRIM27
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4531579
+</td>
+<td style="text-align:right;">
+4.0461269
+</td>
+<td style="text-align:right;">
+0.0015079
+</td>
+<td style="text-align:right;">
+0.9217361
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC004057.1
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.4434914
+</td>
+<td style="text-align:right;">
+4.4031269
+</td>
+<td style="text-align:right;">
+0.0015211
+</td>
+<td style="text-align:right;">
+0.9217361
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AJ003147.9
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.7857427
+</td>
+<td style="text-align:right;">
+-0.5823372
+</td>
+<td style="text-align:right;">
+0.0015671
+</td>
+<td style="text-align:right;">
+0.9269879
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DCLRE1C
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.2798073
+</td>
+<td style="text-align:right;">
+5.3842267
+</td>
+<td style="text-align:right;">
+0.0016769
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+0.9029856
+</td>
+<td style="text-align:right;">
+6.0611001
+</td>
+<td style="text-align:right;">
+0.0017381
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-120K18.2
+</td>
+<td style="text-align:left;">
+sense_overlapping
+</td>
+<td style="text-align:right;">
+-1.0933342
+</td>
+<td style="text-align:right;">
+0.5054542
+</td>
+<td style="text-align:right;">
+0.0018032
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-106J23.1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.5864835
+</td>
+<td style="text-align:right;">
+-0.8054323
+</td>
+<td style="text-align:right;">
+0.0018291
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-514P8.7
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8277966
+</td>
+<td style="text-align:right;">
+2.2791830
+</td>
+<td style="text-align:right;">
+0.0018380
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CH507-513H4.6
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-0.9380186
+</td>
+<td style="text-align:right;">
+12.2324106
+</td>
+<td style="text-align:right;">
+0.0018532
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Y_RNA
+</td>
+<td style="text-align:left;">
+misc_RNA
+</td>
+<td style="text-align:right;">
+0.6358219
+</td>
+<td style="text-align:right;">
+2.9679945
+</td>
+<td style="text-align:right;">
+0.0018649
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+A2M-AS1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+0.8809931
+</td>
+<td style="text-align:right;">
+2.7730584
+</td>
+<td style="text-align:right;">
+0.0019497
+</td>
+<td style="text-align:right;">
+0.9364736
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="top-de-genes-with-log21.1" class="section level2">
+<h2>Top DE genes with log2(1.1)</h2>
+<pre class="r"><code>topTables_tfit &lt;- colnames(contr.matrix) %&gt;%
+  sapply(function(x){
+  topTreat(tfit, coef = x, n = Inf) %&gt;%
+      as_tibble() %&gt;%
+      rownames_to_column(&quot;No.&quot;) %&gt;%
+      arrange(P.Value) %&gt;% 
+      mutate(DE= adj.P.Val &lt; alpha,
+             Status = case_when(
+      DE ==TRUE &amp; logFC &lt; 0 ~ &quot;Down&quot;,
+      DE == TRUE &amp; logFC &gt; 0 ~ &quot;Up&quot;),
+      Status = ifelse(is.na(Status), &quot;NotSig&quot;, Status))}, simplify = FALSE)</code></pre>
+<pre class="r"><code>    topTables_tfit[[1]] %&gt;%
+      head(50) %&gt;%
+      tibble() %&gt;%
+      dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% 
+      kable %&gt;%
+      kable_styling() %&gt;%
+      scroll_box(height=&quot;500px&quot;)</code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+DPY19L1P1
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+2.2088421
+</td>
+<td style="text-align:right;">
+1.5925441
+</td>
+<td style="text-align:right;">
+0.0000636
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ESPN
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2337703
+</td>
+<td style="text-align:right;">
+2.0581126
+</td>
+<td style="text-align:right;">
+0.0000787
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EGR1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.9020845
+</td>
+<td style="text-align:right;">
+3.7789092
+</td>
+<td style="text-align:right;">
+0.0003993
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BRD9P2
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.2062971
+</td>
+<td style="text-align:right;">
+1.2519444
+</td>
+<td style="text-align:right;">
+0.0004160
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANK1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.1155738
+</td>
+<td style="text-align:right;">
+4.1238565
+</td>
+<td style="text-align:right;">
+0.0004610
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP4-583P15.14
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-3.0262081
+</td>
+<td style="text-align:right;">
+2.5677550
+</td>
+<td style="text-align:right;">
+0.0004818
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-1379J22.5
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-2.7946824
+</td>
+<td style="text-align:right;">
+-0.5243250
+</td>
+<td style="text-align:right;">
+0.0004945
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+METTL7A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8025411
+</td>
+<td style="text-align:right;">
+4.5090614
+</td>
+<td style="text-align:right;">
+0.0004995
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PDE4A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.1959911
+</td>
+<td style="text-align:right;">
+4.6683854
+</td>
+<td style="text-align:right;">
+0.0005401
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF22
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9285786
+</td>
+<td style="text-align:right;">
+2.4237185
+</td>
+<td style="text-align:right;">
+0.0005694
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P9
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.5980787
+</td>
+<td style="text-align:right;">
+4.5548393
+</td>
+<td style="text-align:right;">
+0.0006244
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCARNA10
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-0.6472095
+</td>
+<td style="text-align:right;">
+8.2371315
+</td>
+<td style="text-align:right;">
+0.0006714
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEPRO
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5444664
+</td>
+<td style="text-align:right;">
+6.0950965
+</td>
+<td style="text-align:right;">
+0.0006799
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+XXYLT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.9727566
+</td>
+<td style="text-align:right;">
+3.6161985
+</td>
+<td style="text-align:right;">
+0.0007346
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ATP5J
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2114779
+</td>
+<td style="text-align:right;">
+1.9341301
+</td>
+<td style="text-align:right;">
+0.0007531
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC38A8
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.1202928
+</td>
+<td style="text-align:right;">
+0.7937544
+</td>
+<td style="text-align:right;">
+0.0008033
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-264F23.1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.7929168
+</td>
+<td style="text-align:right;">
+-0.7520049
+</td>
+<td style="text-align:right;">
+0.0008478
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PKD2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9153586
+</td>
+<td style="text-align:right;">
+4.0646132
+</td>
+<td style="text-align:right;">
+0.0009087
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC36A4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.6602473
+</td>
+<td style="text-align:right;">
+4.3916353
+</td>
+<td style="text-align:right;">
+0.0009437
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ORMDL1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4799990
+</td>
+<td style="text-align:right;">
+6.4840579
+</td>
+<td style="text-align:right;">
+0.0010007
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+OACYLP
+</td>
+<td style="text-align:left;">
+transcribed_unitary_pseudogene
+</td>
+<td style="text-align:right;">
+1.8957625
+</td>
+<td style="text-align:right;">
+-0.0419690
+</td>
+<td style="text-align:right;">
+0.0010119
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANKRD18EP
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-0.7404960
+</td>
+<td style="text-align:right;">
+3.5519961
+</td>
+<td style="text-align:right;">
+0.0010483
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+C5orf67
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.3683691
+</td>
+<td style="text-align:right;">
+-0.9922841
+</td>
+<td style="text-align:right;">
+0.0010553
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TNNC2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.6998338
+</td>
+<td style="text-align:right;">
+-0.6568040
+</td>
+<td style="text-align:right;">
+0.0010666
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PIGQ
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.6103278
+</td>
+<td style="text-align:right;">
+3.7674732
+</td>
+<td style="text-align:right;">
+0.0010814
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HSD17B7P2
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.7434481
+</td>
+<td style="text-align:right;">
+1.9117509
+</td>
+<td style="text-align:right;">
+0.0010907
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CEP131
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8477435
+</td>
+<td style="text-align:right;">
+2.4763065
+</td>
+<td style="text-align:right;">
+0.0011020
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEF1A1P14
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.3079123
+</td>
+<td style="text-align:right;">
+1.4683174
+</td>
+<td style="text-align:right;">
+0.0011208
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LSM5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8618352
+</td>
+<td style="text-align:right;">
+3.2682984
+</td>
+<td style="text-align:right;">
+0.0011435
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LINC00266-1
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-1.5525649
+</td>
+<td style="text-align:right;">
+0.8716679
+</td>
+<td style="text-align:right;">
+0.0011504
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NRG2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.8179879
+</td>
+<td style="text-align:right;">
+-0.9093414
+</td>
+<td style="text-align:right;">
+0.0011867
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-180C16.1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+1.2361189
+</td>
+<td style="text-align:right;">
+2.5781492
+</td>
+<td style="text-align:right;">
+0.0011915
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-631M21.7
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.3601509
+</td>
+<td style="text-align:right;">
+0.9912833
+</td>
+<td style="text-align:right;">
+0.0012146
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AP000350.5
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-4.0639001
+</td>
+<td style="text-align:right;">
+3.1519121
+</td>
+<td style="text-align:right;">
+0.0012659
+</td>
+<td style="text-align:right;">
+0.9250518
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WISP3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0171619
+</td>
+<td style="text-align:right;">
+1.3977560
+</td>
+<td style="text-align:right;">
+0.0013779
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BCL2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5410658
+</td>
+<td style="text-align:right;">
+7.7224171
+</td>
+<td style="text-align:right;">
+0.0014502
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HLA-J
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.7352774
+</td>
+<td style="text-align:right;">
+2.5753352
+</td>
+<td style="text-align:right;">
+0.0014596
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-787I22.3
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.0978314
+</td>
+<td style="text-align:right;">
+2.3303699
+</td>
+<td style="text-align:right;">
+0.0015318
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GDPD5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8371269
+</td>
+<td style="text-align:right;">
+5.9153040
+</td>
+<td style="text-align:right;">
+0.0015337
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+OSBPL1A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.9899836
+</td>
+<td style="text-align:right;">
+2.4998615
+</td>
+<td style="text-align:right;">
+0.0016201
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ATP5G2P3
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-0.8163916
+</td>
+<td style="text-align:right;">
+2.7828224
+</td>
+<td style="text-align:right;">
+0.0016657
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RAET1G
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.2247247
+</td>
+<td style="text-align:right;">
+-1.2726913
+</td>
+<td style="text-align:right;">
+0.0016816
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TMEM243
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4674560
+</td>
+<td style="text-align:right;">
+6.8358284
+</td>
+<td style="text-align:right;">
+0.0017139
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P7
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.4327788
+</td>
+<td style="text-align:right;">
+0.3812383
+</td>
+<td style="text-align:right;">
+0.0017361
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BCCIP
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4834606
+</td>
+<td style="text-align:right;">
+5.7090204
+</td>
+<td style="text-align:right;">
+0.0017411
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MCF2L2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.5786117
+</td>
+<td style="text-align:right;">
+7.1367302
+</td>
+<td style="text-align:right;">
+0.0017913
+</td>
+<td style="text-align:right;">
+0.9674778
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PLD3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4926712
+</td>
+<td style="text-align:right;">
+5.1505008
+</td>
+<td style="text-align:right;">
+0.0019357
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TRAT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4722242
+</td>
+<td style="text-align:right;">
+6.7433054
+</td>
+<td style="text-align:right;">
+0.0019923
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LINC00612
+</td>
+<td style="text-align:left;">
+processed_transcript
+</td>
+<td style="text-align:right;">
+1.3509746
+</td>
+<td style="text-align:right;">
+2.6929378
+</td>
+<td style="text-align:right;">
+0.0020771
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HLF
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.3915170
+</td>
+<td style="text-align:right;">
+2.8339066
+</td>
+<td style="text-align:right;">
+0.0021042
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>names(topTables_tfit) %&gt;%
+  sapply(function(x){
+    topTables_tfit[[x]] %&gt;%
+      head(50) %&gt;%
+      tibble() %&gt;%
+      dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% 
+      kable %&gt;%
+      kable_styling() %&gt;%
+      scroll_box(height=&quot;500px&quot;)}, simplify = FALSE)</code></pre>
+$AvsB
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+DPY19L1P1
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+2.2088421
+</td>
+<td style="text-align:right;">
+1.5925441
+</td>
+<td style="text-align:right;">
+0.0000636
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ESPN
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2337703
+</td>
+<td style="text-align:right;">
+2.0581126
+</td>
+<td style="text-align:right;">
+0.0000787
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EGR1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.9020845
+</td>
+<td style="text-align:right;">
+3.7789092
+</td>
+<td style="text-align:right;">
+0.0003993
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BRD9P2
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.2062971
+</td>
+<td style="text-align:right;">
+1.2519444
+</td>
+<td style="text-align:right;">
+0.0004160
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANK1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.1155738
+</td>
+<td style="text-align:right;">
+4.1238565
+</td>
+<td style="text-align:right;">
+0.0004610
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP4-583P15.14
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-3.0262081
+</td>
+<td style="text-align:right;">
+2.5677550
+</td>
+<td style="text-align:right;">
+0.0004818
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-1379J22.5
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-2.7946824
+</td>
+<td style="text-align:right;">
+-0.5243250
+</td>
+<td style="text-align:right;">
+0.0004945
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+METTL7A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8025411
+</td>
+<td style="text-align:right;">
+4.5090614
+</td>
+<td style="text-align:right;">
+0.0004995
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PDE4A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.1959911
+</td>
+<td style="text-align:right;">
+4.6683854
+</td>
+<td style="text-align:right;">
+0.0005401
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF22
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9285786
+</td>
+<td style="text-align:right;">
+2.4237185
+</td>
+<td style="text-align:right;">
+0.0005694
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P9
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.5980787
+</td>
+<td style="text-align:right;">
+4.5548393
+</td>
+<td style="text-align:right;">
+0.0006244
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCARNA10
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-0.6472095
+</td>
+<td style="text-align:right;">
+8.2371315
+</td>
+<td style="text-align:right;">
+0.0006714
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEPRO
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5444664
+</td>
+<td style="text-align:right;">
+6.0950965
+</td>
+<td style="text-align:right;">
+0.0006799
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+XXYLT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.9727566
+</td>
+<td style="text-align:right;">
+3.6161985
+</td>
+<td style="text-align:right;">
+0.0007346
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ATP5J
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2114779
+</td>
+<td style="text-align:right;">
+1.9341301
+</td>
+<td style="text-align:right;">
+0.0007531
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC38A8
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.1202928
+</td>
+<td style="text-align:right;">
+0.7937544
+</td>
+<td style="text-align:right;">
+0.0008033
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-264F23.1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.7929168
+</td>
+<td style="text-align:right;">
+-0.7520049
+</td>
+<td style="text-align:right;">
+0.0008478
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PKD2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9153586
+</td>
+<td style="text-align:right;">
+4.0646132
+</td>
+<td style="text-align:right;">
+0.0009087
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC36A4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.6602473
+</td>
+<td style="text-align:right;">
+4.3916353
+</td>
+<td style="text-align:right;">
+0.0009437
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ORMDL1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4799990
+</td>
+<td style="text-align:right;">
+6.4840579
+</td>
+<td style="text-align:right;">
+0.0010007
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+OACYLP
+</td>
+<td style="text-align:left;">
+transcribed_unitary_pseudogene
+</td>
+<td style="text-align:right;">
+1.8957625
+</td>
+<td style="text-align:right;">
+-0.0419690
+</td>
+<td style="text-align:right;">
+0.0010119
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANKRD18EP
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-0.7404960
+</td>
+<td style="text-align:right;">
+3.5519961
+</td>
+<td style="text-align:right;">
+0.0010483
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+C5orf67
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.3683691
+</td>
+<td style="text-align:right;">
+-0.9922841
+</td>
+<td style="text-align:right;">
+0.0010553
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TNNC2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.6998338
+</td>
+<td style="text-align:right;">
+-0.6568040
+</td>
+<td style="text-align:right;">
+0.0010666
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PIGQ
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.6103278
+</td>
+<td style="text-align:right;">
+3.7674732
+</td>
+<td style="text-align:right;">
+0.0010814
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HSD17B7P2
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.7434481
+</td>
+<td style="text-align:right;">
+1.9117509
+</td>
+<td style="text-align:right;">
+0.0010907
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CEP131
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8477435
+</td>
+<td style="text-align:right;">
+2.4763065
+</td>
+<td style="text-align:right;">
+0.0011020
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EEF1A1P14
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.3079123
+</td>
+<td style="text-align:right;">
+1.4683174
+</td>
+<td style="text-align:right;">
+0.0011208
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LSM5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8618352
+</td>
+<td style="text-align:right;">
+3.2682984
+</td>
+<td style="text-align:right;">
+0.0011435
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LINC00266-1
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-1.5525649
+</td>
+<td style="text-align:right;">
+0.8716679
+</td>
+<td style="text-align:right;">
+0.0011504
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NRG2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.8179879
+</td>
+<td style="text-align:right;">
+-0.9093414
+</td>
+<td style="text-align:right;">
+0.0011867
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-180C16.1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+1.2361189
+</td>
+<td style="text-align:right;">
+2.5781492
+</td>
+<td style="text-align:right;">
+0.0011915
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-631M21.7
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.3601509
+</td>
+<td style="text-align:right;">
+0.9912833
+</td>
+<td style="text-align:right;">
+0.0012146
+</td>
+<td style="text-align:right;">
+0.9144653
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AP000350.5
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-4.0639001
+</td>
+<td style="text-align:right;">
+3.1519121
+</td>
+<td style="text-align:right;">
+0.0012659
+</td>
+<td style="text-align:right;">
+0.9250518
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WISP3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0171619
+</td>
+<td style="text-align:right;">
+1.3977560
+</td>
+<td style="text-align:right;">
+0.0013779
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BCL2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.5410658
+</td>
+<td style="text-align:right;">
+7.7224171
+</td>
+<td style="text-align:right;">
+0.0014502
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HLA-J
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.7352774
+</td>
+<td style="text-align:right;">
+2.5753352
+</td>
+<td style="text-align:right;">
+0.0014596
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-787I22.3
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.0978314
+</td>
+<td style="text-align:right;">
+2.3303699
+</td>
+<td style="text-align:right;">
+0.0015318
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GDPD5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8371269
+</td>
+<td style="text-align:right;">
+5.9153040
+</td>
+<td style="text-align:right;">
+0.0015337
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+OSBPL1A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.9899836
+</td>
+<td style="text-align:right;">
+2.4998615
+</td>
+<td style="text-align:right;">
+0.0016201
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ATP5G2P3
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-0.8163916
+</td>
+<td style="text-align:right;">
+2.7828224
+</td>
+<td style="text-align:right;">
+0.0016657
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RAET1G
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.2247247
+</td>
+<td style="text-align:right;">
+-1.2726913
+</td>
+<td style="text-align:right;">
+0.0016816
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TMEM243
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4674560
+</td>
+<td style="text-align:right;">
+6.8358284
+</td>
+<td style="text-align:right;">
+0.0017139
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P7
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.4327788
+</td>
+<td style="text-align:right;">
+0.3812383
+</td>
+<td style="text-align:right;">
+0.0017361
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BCCIP
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4834606
+</td>
+<td style="text-align:right;">
+5.7090204
+</td>
+<td style="text-align:right;">
+0.0017411
+</td>
+<td style="text-align:right;">
+0.9613002
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MCF2L2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.5786117
+</td>
+<td style="text-align:right;">
+7.1367302
+</td>
+<td style="text-align:right;">
+0.0017913
+</td>
+<td style="text-align:right;">
+0.9674778
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PLD3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.4926712
+</td>
+<td style="text-align:right;">
+5.1505008
+</td>
+<td style="text-align:right;">
+0.0019357
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TRAT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4722242
+</td>
+<td style="text-align:right;">
+6.7433054
+</td>
+<td style="text-align:right;">
+0.0019923
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LINC00612
+</td>
+<td style="text-align:left;">
+processed_transcript
+</td>
+<td style="text-align:right;">
+1.3509746
+</td>
+<td style="text-align:right;">
+2.6929378
+</td>
+<td style="text-align:right;">
+0.0020771
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HLF
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.3915170
+</td>
+<td style="text-align:right;">
+2.8339066
+</td>
+<td style="text-align:right;">
+0.0021042
+</td>
+<td style="text-align:right;">
+0.9999306
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+$BvsC
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+HLA-J
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.7293160
+</td>
+<td style="text-align:right;">
+2.5753352
+</td>
+<td style="text-align:right;">
+0.0000452
+</td>
+<td style="text-align:right;">
+0.6013299
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC068831.15
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.1087730
+</td>
+<td style="text-align:right;">
+2.1766129
+</td>
+<td style="text-align:right;">
+0.0000671
+</td>
+<td style="text-align:right;">
+0.6013299
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CTD-2532D12.4
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-3.8610675
+</td>
+<td style="text-align:right;">
+-1.2506540
+</td>
+<td style="text-align:right;">
+0.0001006
+</td>
+<td style="text-align:right;">
+0.6013299
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIAP2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-3.1910609
+</td>
+<td style="text-align:right;">
+-1.0864749
+</td>
+<td style="text-align:right;">
+0.0001144
+</td>
+<td style="text-align:right;">
+0.6013299
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NAPRT
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-2.1788602
+</td>
+<td style="text-align:right;">
+2.4714416
+</td>
+<td style="text-align:right;">
+0.0001210
+</td>
+<td style="text-align:right;">
+0.6013299
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-493L12.5
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-2.7907177
+</td>
+<td style="text-align:right;">
+0.1646672
+</td>
+<td style="text-align:right;">
+0.0002782
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WISP3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2266690
+</td>
+<td style="text-align:right;">
+1.3977560
+</td>
+<td style="text-align:right;">
+0.0003967
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC093166.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.3428945
+</td>
+<td style="text-align:right;">
+-0.2055705
+</td>
+<td style="text-align:right;">
+0.0004471
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP4-583P15.14
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+3.1614588
+</td>
+<td style="text-align:right;">
+2.5677550
+</td>
+<td style="text-align:right;">
+0.0004629
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WDSUB1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.4142559
+</td>
+<td style="text-align:right;">
+2.4128676
+</td>
+<td style="text-align:right;">
+0.0004659
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+C4orf50
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.6836984
+</td>
+<td style="text-align:right;">
+2.4750962
+</td>
+<td style="text-align:right;">
+0.0004710
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PID1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2454684
+</td>
+<td style="text-align:right;">
+5.4272463
+</td>
+<td style="text-align:right;">
+0.0004959
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIP5K1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.7340516
+</td>
+<td style="text-align:right;">
+3.6838756
+</td>
+<td style="text-align:right;">
+0.0005260
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TRAT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.5498945
+</td>
+<td style="text-align:right;">
+6.7433054
+</td>
+<td style="text-align:right;">
+0.0007276
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HSD17B7P2
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.8583815
+</td>
+<td style="text-align:right;">
+1.9117509
+</td>
+<td style="text-align:right;">
+0.0010209
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-295I5.3
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+1.8401289
+</td>
+<td style="text-align:right;">
+0.6380078
+</td>
+<td style="text-align:right;">
+0.0010571
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EGR1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.9035949
+</td>
+<td style="text-align:right;">
+3.7789092
+</td>
+<td style="text-align:right;">
+0.0011112
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P7
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+2.7087129
+</td>
+<td style="text-align:right;">
+0.3812383
+</td>
+<td style="text-align:right;">
+0.0011225
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BTNL10
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-3.1698723
+</td>
+<td style="text-align:right;">
+-1.0400720
+</td>
+<td style="text-align:right;">
+0.0011228
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPL9P9
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.6081373
+</td>
+<td style="text-align:right;">
+4.5548393
+</td>
+<td style="text-align:right;">
+0.0011244
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SLC7A11-AS1
+</td>
+<td style="text-align:left;">
+processed_transcript
+</td>
+<td style="text-align:right;">
+-1.1592804
+</td>
+<td style="text-align:right;">
+1.2472938
+</td>
+<td style="text-align:right;">
+0.0012051
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FTOP1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.7418763
+</td>
+<td style="text-align:right;">
+-0.9165538
+</td>
+<td style="text-align:right;">
+0.0013146
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAGED4B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-2.1402896
+</td>
+<td style="text-align:right;">
+0.0426959
+</td>
+<td style="text-align:right;">
+0.0014102
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-107K17.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+3.5941614
+</td>
+<td style="text-align:right;">
+-1.1831307
+</td>
+<td style="text-align:right;">
+0.0017745
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIRE
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9570654
+</td>
+<td style="text-align:right;">
+1.7437442
+</td>
+<td style="text-align:right;">
+0.0017802
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-214N16.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.2864526
+</td>
+<td style="text-align:right;">
+2.8680325
+</td>
+<td style="text-align:right;">
+0.0018881
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-643A5.3
+</td>
+<td style="text-align:left;">
+TEC
+</td>
+<td style="text-align:right;">
+-2.0199105
+</td>
+<td style="text-align:right;">
+-0.2864969
+</td>
+<td style="text-align:right;">
+0.0018902
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LRRC37A17P
+</td>
+<td style="text-align:left;">
+transcribed_unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.0471489
+</td>
+<td style="text-align:right;">
+3.4099457
+</td>
+<td style="text-align:right;">
+0.0020274
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NLRP2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.8817821
+</td>
+<td style="text-align:right;">
+2.8787361
+</td>
+<td style="text-align:right;">
+0.0020404
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MARCKSL1P1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+3.5665075
+</td>
+<td style="text-align:right;">
+-0.9408351
+</td>
+<td style="text-align:right;">
+0.0021125
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ANK1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0400248
+</td>
+<td style="text-align:right;">
+4.1238565
+</td>
+<td style="text-align:right;">
+0.0021165
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-1379J22.5
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+2.5360563
+</td>
+<td style="text-align:right;">
+-0.5243250
+</td>
+<td style="text-align:right;">
+0.0021744
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BRD9P2
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.1110041
+</td>
+<td style="text-align:right;">
+1.2519444
+</td>
+<td style="text-align:right;">
+0.0022660
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-123C21.3
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+1.4976737
+</td>
+<td style="text-align:right;">
+0.8790597
+</td>
+<td style="text-align:right;">
+0.0022722
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+UNC13A
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0721751
+</td>
+<td style="text-align:right;">
+1.5934061
+</td>
+<td style="text-align:right;">
+0.0024902
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VWDE
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-3.1830506
+</td>
+<td style="text-align:right;">
+0.3284378
+</td>
+<td style="text-align:right;">
+0.0025417
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC006004.1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.6348629
+</td>
+<td style="text-align:right;">
+-0.6254627
+</td>
+<td style="text-align:right;">
+0.0025442
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC097532.2
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-1.4593585
+</td>
+<td style="text-align:right;">
+3.2889596
+</td>
+<td style="text-align:right;">
+0.0025983
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LPP-AS1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.8177251
+</td>
+<td style="text-align:right;">
+-0.8583879
+</td>
+<td style="text-align:right;">
+0.0026912
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-180C16.1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.2301174
+</td>
+<td style="text-align:right;">
+2.5781492
+</td>
+<td style="text-align:right;">
+0.0027669
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CDHR2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.3258932
+</td>
+<td style="text-align:right;">
+1.2267066
+</td>
+<td style="text-align:right;">
+0.0028041
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-790I12.3
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-3.4973385
+</td>
+<td style="text-align:right;">
+-1.6711500
+</td>
+<td style="text-align:right;">
+0.0028241
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-688G15.3
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-4.3369653
+</td>
+<td style="text-align:right;">
+-0.4603138
+</td>
+<td style="text-align:right;">
+0.0029621
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CTA-972D3.2
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+3.6378715
+</td>
+<td style="text-align:right;">
+-1.8088112
+</td>
+<td style="text-align:right;">
+0.0030120
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZSCAN20
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.1293813
+</td>
+<td style="text-align:right;">
+1.1040130
+</td>
+<td style="text-align:right;">
+0.0030679
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SKIDA1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.7923631
+</td>
+<td style="text-align:right;">
+3.6957694
+</td>
+<td style="text-align:right;">
+0.0030785
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AP001056.1
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+1.8782035
+</td>
+<td style="text-align:right;">
+0.5960658
+</td>
+<td style="text-align:right;">
+0.0030874
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NRG2
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.8126117
+</td>
+<td style="text-align:right;">
+-0.9093414
+</td>
+<td style="text-align:right;">
+0.0031663
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GRAMD1B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8065017
+</td>
+<td style="text-align:right;">
+5.2570400
+</td>
+<td style="text-align:right;">
+0.0033375
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HCG4P3
+</td>
+<td style="text-align:left;">
+unprocessed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.3761432
+</td>
+<td style="text-align:right;">
+1.3517449
+</td>
+<td style="text-align:right;">
+0.0034672
+</td>
+<td style="text-align:right;">
+0.9999748
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+$AvsC
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_name
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+gene_biotype
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logFC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AveExpr
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+P.Value
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+adj.P.Val
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+Status
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+WDSUB1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.8757306
+</td>
+<td style="text-align:right;">
+2.4128676
+</td>
+<td style="text-align:right;">
+0.0000005
+</td>
+<td style="text-align:right;">
+0.0134522
+</td>
+<td style="text-align:left;">
+Down
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+UST
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2070426
+</td>
+<td style="text-align:right;">
+4.2534374
+</td>
+<td style="text-align:right;">
+0.0000739
+</td>
+<td style="text-align:right;">
+0.7191622
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PPIAP2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-2.8360414
+</td>
+<td style="text-align:right;">
+-1.0864749
+</td>
+<td style="text-align:right;">
+0.0000996
+</td>
+<td style="text-align:right;">
+0.7191622
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+KRT1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-4.1498548
+</td>
+<td style="text-align:right;">
+-3.2540461
+</td>
+<td style="text-align:right;">
+0.0001158
+</td>
+<td style="text-align:right;">
+0.7191622
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEX101
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-2.2707491
+</td>
+<td style="text-align:right;">
+0.6196209
+</td>
+<td style="text-align:right;">
+0.0002282
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ADTRP
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.1575290
+</td>
+<td style="text-align:right;">
+4.8414121
+</td>
+<td style="text-align:right;">
+0.0002842
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SNORA67
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-1.3289885
+</td>
+<td style="text-align:right;">
+2.3126805
+</td>
+<td style="text-align:right;">
+0.0004674
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZDHHC11B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.4073365
+</td>
+<td style="text-align:right;">
+2.3770322
+</td>
+<td style="text-align:right;">
+0.0006555
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LPAR5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.7904368
+</td>
+<td style="text-align:right;">
+3.1022353
+</td>
+<td style="text-align:right;">
+0.0006685
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NAPRT
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.5710054
+</td>
+<td style="text-align:right;">
+2.4714416
+</td>
+<td style="text-align:right;">
+0.0009649
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+UPK3BL
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8962328
+</td>
+<td style="text-align:right;">
+3.2205936
+</td>
+<td style="text-align:right;">
+0.0010065
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SCARNA10
+</td>
+<td style="text-align:left;">
+snoRNA
+</td>
+<td style="text-align:right;">
+-0.5464758
+</td>
+<td style="text-align:right;">
+8.2371315
+</td>
+<td style="text-align:right;">
+0.0010357
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CTD-2532D12.4
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-2.6120021
+</td>
+<td style="text-align:right;">
+-1.2506540
+</td>
+<td style="text-align:right;">
+0.0011192
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-252K23.2
+</td>
+<td style="text-align:left;">
+sense_intronic
+</td>
+<td style="text-align:right;">
+1.0834826
+</td>
+<td style="text-align:right;">
+0.7097214
+</td>
+<td style="text-align:right;">
+0.0013303
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-493L12.5
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-2.0830719
+</td>
+<td style="text-align:right;">
+0.1646672
+</td>
+<td style="text-align:right;">
+0.0013357
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF185
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.0224049
+</td>
+<td style="text-align:right;">
+1.3389113
+</td>
+<td style="text-align:right;">
+0.0015633
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-577H5.5
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.7209226
+</td>
+<td style="text-align:right;">
+3.6360259
+</td>
+<td style="text-align:right;">
+0.0017121
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC010970.2
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.2359201
+</td>
+<td style="text-align:right;">
+12.0154706
+</td>
+<td style="text-align:right;">
+0.0017612
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CHCHD1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2912075
+</td>
+<td style="text-align:right;">
+0.4008198
+</td>
+<td style="text-align:right;">
+0.0018286
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5_8S_rRNA
+</td>
+<td style="text-align:left;">
+rRNA
+</td>
+<td style="text-align:right;">
+-1.3281074
+</td>
+<td style="text-align:right;">
+1.3995946
+</td>
+<td style="text-align:right;">
+0.0018664
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AJ003147.9
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.7857427
+</td>
+<td style="text-align:right;">
+-0.5823372
+</td>
+<td style="text-align:right;">
+0.0019361
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+APCDD1L
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.2408095
+</td>
+<td style="text-align:right;">
+0.0047128
+</td>
+<td style="text-align:right;">
+0.0019474
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC004057.1
+</td>
+<td style="text-align:left;">
+transcribed_processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.4434914
+</td>
+<td style="text-align:right;">
+4.4031269
+</td>
+<td style="text-align:right;">
+0.0020836
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MTRNR2L4
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.8636719
+</td>
+<td style="text-align:right;">
+1.7975499
+</td>
+<td style="text-align:right;">
+0.0020874
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-106J23.1
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.5864835
+</td>
+<td style="text-align:right;">
+-0.8054323
+</td>
+<td style="text-align:right;">
+0.0023544
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VSNL1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0222453
+</td>
+<td style="text-align:right;">
+1.2824380
+</td>
+<td style="text-align:right;">
+0.0023988
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PYGO1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.9593260
+</td>
+<td style="text-align:right;">
+0.8025849
+</td>
+<td style="text-align:right;">
+0.0025070
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+KCNIP3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+2.0084906
+</td>
+<td style="text-align:right;">
+-0.7471268
+</td>
+<td style="text-align:right;">
+0.0025076
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP1-122K4.3
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-0.7829633
+</td>
+<td style="text-align:right;">
+1.9653218
+</td>
+<td style="text-align:right;">
+0.0027308
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AC104820.2
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+0.8620518
+</td>
+<td style="text-align:right;">
+4.6882823
+</td>
+<td style="text-align:right;">
+0.0028116
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WNK3
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.2518969
+</td>
+<td style="text-align:right;">
+0.5549356
+</td>
+<td style="text-align:right;">
+0.0028828
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-83J16.3
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+-1.7329452
+</td>
+<td style="text-align:right;">
+-0.7591825
+</td>
+<td style="text-align:right;">
+0.0029189
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-927P21.2
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-1.4668041
+</td>
+<td style="text-align:right;">
+1.3767020
+</td>
+<td style="text-align:right;">
+0.0029332
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-120K18.2
+</td>
+<td style="text-align:left;">
+sense_overlapping
+</td>
+<td style="text-align:right;">
+-1.0933342
+</td>
+<td style="text-align:right;">
+0.5054542
+</td>
+<td style="text-align:right;">
+0.0029451
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+WDR86-AS1
+</td>
+<td style="text-align:left;">
+processed_transcript
+</td>
+<td style="text-align:right;">
+2.1642660
+</td>
+<td style="text-align:right;">
+-1.4124324
+</td>
+<td style="text-align:right;">
+0.0029820
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FOXCUT
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+1.2496473
+</td>
+<td style="text-align:right;">
+-0.2087520
+</td>
+<td style="text-align:right;">
+0.0030552
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HCG25
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+-0.7524250
+</td>
+<td style="text-align:right;">
+1.7570815
+</td>
+<td style="text-align:right;">
+0.0031533
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RPS26P15
+</td>
+<td style="text-align:left;">
+processed_pseudogene
+</td>
+<td style="text-align:right;">
+1.4142806
+</td>
+<td style="text-align:right;">
+1.5359866
+</td>
+<td style="text-align:right;">
+0.0032779
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ZNF22
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.6078324
+</td>
+<td style="text-align:right;">
+2.4237185
+</td>
+<td style="text-align:right;">
+0.0033610
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+0.9029856
+</td>
+<td style="text-align:right;">
+6.0611001
+</td>
+<td style="text-align:right;">
+0.0034328
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CH507-513H4.6
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+-0.9380186
+</td>
+<td style="text-align:right;">
+12.2324106
+</td>
+<td style="text-align:right;">
+0.0034784
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FOXI1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+1.3530691
+</td>
+<td style="text-align:right;">
+0.4584951
+</td>
+<td style="text-align:right;">
+0.0038118
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+A2M-AS1
+</td>
+<td style="text-align:left;">
+antisense
+</td>
+<td style="text-align:right;">
+0.8809931
+</td>
+<td style="text-align:right;">
+2.7730584
+</td>
+<td style="text-align:right;">
+0.0038816
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NEPRO
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-0.4060475
+</td>
+<td style="text-align:right;">
+6.0950965
+</td>
+<td style="text-align:right;">
+0.0039502
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DNMT3B
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.5180521
+</td>
+<td style="text-align:right;">
+-1.0357086
+</td>
+<td style="text-align:right;">
+0.0039712
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-514P8.7
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8277966
+</td>
+<td style="text-align:right;">
+2.2791830
+</td>
+<td style="text-align:right;">
+0.0039760
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CTD-2227C6.2
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+1.1277656
+</td>
+<td style="text-align:right;">
+1.5542861
+</td>
+<td style="text-align:right;">
+0.0040741
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RP11-61G19.2
+</td>
+<td style="text-align:left;">
+lincRNA
+</td>
+<td style="text-align:right;">
+1.5461656
+</td>
+<td style="text-align:right;">
+0.7724240
+</td>
+<td style="text-align:right;">
+0.0042644
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CDH12
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+-1.0206907
+</td>
+<td style="text-align:right;">
+0.8111349
+</td>
+<td style="text-align:right;">
+0.0044537
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+B9D1
+</td>
+<td style="text-align:left;">
+protein_coding
+</td>
+<td style="text-align:right;">
+0.8851975
+</td>
+<td style="text-align:right;">
+1.6019496
+</td>
+<td style="text-align:right;">
+0.0045086
+</td>
+<td style="text-align:right;">
+0.9999976
+</td>
+<td style="text-align:left;">
+NotSig
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>deCols &lt;- c(
+  &#39;Up&#39; = rgb(1, 0, 0, 1),
+  &#39;Down&#39; = rgb(0, 0, 1, 1),
+  &#39;NotSig&#39; = rgb(0.5, 0.5, 0.5, 0.7),
+  `FALSE` = rgb(0.5, 0.5, 0.5, 0.7),
+  `TRUE` = rgb(1, 0, 0, 0.7))</code></pre>
+<pre class="r"><code>top20Down &lt;- topTables_tfit$AvsC %&gt;% dplyr::filter(Status==&quot;Down&quot;) %&gt;% .[1,]
+
+topTables_tfit$AvsC%&gt;%
+  bind_rows() %&gt;%
+  ggplot(aes(logFC, -log10(P.Value), colour = Status)) +
+  geom_point(alpha = 0.4) +
+  geom_label_repel(
+    aes(label = gene_name), size = 3,
+    max.overlaps = getOption(&quot;ggrepel.max.overlaps&quot;, default = 100),
+    data = top20Down)+
+  # data = . %&gt;% .[c(1,2,3,4,5,6,7,8,9,11,12,17,18,19,22,33,35,40,44,46,48,53,55,52,68,69,72,75,78,79,86,91,92,104,109,111,112,113,117,120,187),] 
+  #   # %&gt;% dplyr::filter(FDR &lt; 0.05 &amp; abs(logFC) &gt; minLfc)
+  # )+
+  # geom_vline(
+  #   xintercept = c(-1, 1)*minLfc,
+  #   linetype = 2,
+  #   colour = &quot;red&quot;
+  # ) +
+  scale_colour_manual(values = deCols) +
+  scale_x_continuous(breaks = seq(-4, 4, by = 2)) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>First thing we can try is to include covariates (eg: gender, age, sequencing lane, library prep batch, sequencing batch) into the design matrix. Some factors within an experiment may not be of biological interest. Often they are technical factors such as handling technician, library prep were processed in separate batches, or the sequencing lane on which the samples were sequenced on. There are also biological factors that may not be of direct interest; such as age and gender of donor. This is to ensure that differences detected between groups are not influenced by these factors and can be account for during the modelling process. This also important because the linear modeling steps should know that you are using one or more degree of freedom for the adjustment.</p>
+<p>Secondly remove outlier S6 and S7 and rerun the analysis.</p>
+<p>Thirdly we could try <code>RUVSeq</code> package to adjust for unwanted technical effects that may be present in these data with the use of empirical controls (eg: spike-in / housekeeping genes) that do not change across conditions. This need to be done cautiously with a very low <code>k</code> value to minimize the chance of removing biologically meaningful variation.</p>
+</div>
+</div>
+<div id="export-data" class="section level1">
+<h1>Export Data</h1>
+<pre class="r"><code>dgeList %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;dgeList.rds&quot;))
+samples %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;samples.rds&quot;))
+topTables_tfit %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;topTables_tfit.rds&quot;))
+topTables_efit %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;topTables_efit.rds&quot;))</code></pre>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows Server x64 (build 14393)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_Australia.1252  LC_CTYPE=English_Australia.1252   
+[3] LC_MONETARY=English_Australia.1252 LC_NUMERIC=C                      
+[5] LC_TIME=English_Australia.1252    
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] kableExtra_1.3.4        org.Hs.eg.db_3.13.0     RColorBrewer_1.1-2     
+ [4] pheatmap_1.0.12         scales_1.1.1            corrplot_0.92          
+ [7] ggrepel_0.9.1           edgeR_3.34.1            limma_3.48.0           
+[10] reshape_0.8.8           ggpubr_0.4.0.999        ensembldb_2.16.4       
+[13] AnnotationFilter_1.16.0 GenomicFeatures_1.44.2  AnnotationDbi_1.54.1   
+[16] Biobase_2.52.0          GenomicRanges_1.44.0    GenomeInfoDb_1.28.4    
+[19] IRanges_2.26.0          S4Vectors_0.30.0        AnnotationHub_3.0.1    
+[22] BiocFileCache_2.0.0     dbplyr_2.1.1            BiocGenerics_0.38.0    
+[25] magrittr_2.0.1          forcats_0.5.1           stringr_1.4.0          
+[28] dplyr_1.0.6             purrr_0.3.4             readr_2.0.2            
+[31] tidyr_1.1.4             tibble_3.1.2            ggplot2_3.3.5          
+[34] tidyverse_1.3.1         readxl_1.3.1            pander_0.6.4           
+[37] here_1.0.1             
+
+loaded via a namespace (and not attached):
+  [1] backports_1.4.1               workflowr_1.7.0              
+  [3] systemfonts_1.0.3             plyr_1.8.6                   
+  [5] lazyeval_0.2.2                BiocParallel_1.26.2          
+  [7] digest_0.6.29                 htmltools_0.5.2              
+  [9] fansi_0.5.0                   memoise_2.0.1                
+ [11] tzdb_0.2.0                    Biostrings_2.60.2            
+ [13] modelr_0.1.8                  matrixStats_0.61.0           
+ [15] svglite_2.0.0                 prettyunits_1.1.1            
+ [17] colorspace_2.0-2              blob_1.2.2                   
+ [19] rvest_1.0.2                   rappdirs_0.3.3               
+ [21] haven_2.4.3                   xfun_0.29                    
+ [23] crayon_1.4.2                  RCurl_1.98-1.5               
+ [25] jsonlite_1.7.3                glue_1.4.2                   
+ [27] gtable_0.3.0                  zlibbioc_1.38.0              
+ [29] XVector_0.32.0                webshot_0.5.2                
+ [31] DelayedArray_0.18.0           car_3.0-12                   
+ [33] abind_1.4-5                   DBI_1.1.2                    
+ [35] rstatix_0.7.0                 Rcpp_1.0.8                   
+ [37] viridisLite_0.4.0             xtable_1.8-4                 
+ [39] progress_1.2.2                bit_4.0.4                    
+ [41] httr_1.4.2                    ellipsis_0.3.2               
+ [43] farver_2.1.0                  pkgconfig_2.0.3              
+ [45] XML_3.99-0.8                  sass_0.4.0                   
+ [47] locfit_1.5-9.4                utf8_1.2.1                   
+ [49] labeling_0.4.2                tidyselect_1.1.1             
+ [51] rlang_0.4.11                  later_1.3.0                  
+ [53] munsell_0.5.0                 BiocVersion_3.13.1           
+ [55] cellranger_1.1.0              tools_4.1.0                  
+ [57] cachem_1.0.6                  cli_3.0.0                    
+ [59] generics_0.1.2                RSQLite_2.2.9                
+ [61] broom_0.7.12                  evaluate_0.14                
+ [63] fastmap_1.1.0                 yaml_2.2.2                   
+ [65] knitr_1.37                    bit64_4.0.5                  
+ [67] fs_1.5.2                      KEGGREST_1.32.0              
+ [69] mime_0.12                     xml2_1.3.3                   
+ [71] biomaRt_2.48.3                compiler_4.1.0               
+ [73] rstudioapi_0.13               filelock_1.0.2               
+ [75] curl_4.3.2                    png_0.1-7                    
+ [77] interactiveDisplayBase_1.30.0 ggsignif_0.6.3               
+ [79] reprex_2.0.1                  bslib_0.3.1                  
+ [81] stringi_1.7.6                 highr_0.9                    
+ [83] lattice_0.20-44               ProtGenerics_1.24.0          
+ [85] Matrix_1.3-3                  vctrs_0.3.8                  
+ [87] pillar_1.6.5                  lifecycle_1.0.1              
+ [89] BiocManager_1.30.16           jquerylib_0.1.4              
+ [91] cowplot_1.1.1                 bitops_1.0-7                 
+ [93] httpuv_1.6.5                  rtracklayer_1.52.1           
+ [95] R6_2.5.1                      BiocIO_1.2.0                 
+ [97] promises_1.2.0.1              gridExtra_2.3                
+ [99] assertthat_0.2.1              SummarizedExperiment_1.22.0  
+[101] rprojroot_2.0.2               rjson_0.2.21                 
+[103] withr_2.4.3                   GenomicAlignments_1.28.0     
+[105] Rsamtools_2.8.0               GenomeInfoDbData_1.2.6       
+[107] hms_1.1.1                     grid_4.1.0                   
+[109] rmarkdown_2.11                MatrixGenerics_1.4.3         
+[111] carData_3.0-5                 git2r_0.29.0                 
+[113] shiny_1.7.1                   lubridate_1.8.0              
+[115] restfulr_0.0.13              </code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows Server x64 (build 14393)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_Australia.1252  LC_CTYPE=English_Australia.1252   
+[3] LC_MONETARY=English_Australia.1252 LC_NUMERIC=C                      
+[5] LC_TIME=English_Australia.1252    
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] kableExtra_1.3.4        org.Hs.eg.db_3.13.0     RColorBrewer_1.1-2     
+ [4] pheatmap_1.0.12         scales_1.1.1            corrplot_0.92          
+ [7] ggrepel_0.9.1           edgeR_3.34.1            limma_3.48.0           
+[10] reshape_0.8.8           ggpubr_0.4.0.999        ensembldb_2.16.4       
+[13] AnnotationFilter_1.16.0 GenomicFeatures_1.44.2  AnnotationDbi_1.54.1   
+[16] Biobase_2.52.0          GenomicRanges_1.44.0    GenomeInfoDb_1.28.4    
+[19] IRanges_2.26.0          S4Vectors_0.30.0        AnnotationHub_3.0.1    
+[22] BiocFileCache_2.0.0     dbplyr_2.1.1            BiocGenerics_0.38.0    
+[25] magrittr_2.0.1          forcats_0.5.1           stringr_1.4.0          
+[28] dplyr_1.0.6             purrr_0.3.4             readr_2.0.2            
+[31] tidyr_1.1.4             tibble_3.1.2            ggplot2_3.3.5          
+[34] tidyverse_1.3.1         readxl_1.3.1            pander_0.6.4           
+[37] here_1.0.1             
+
+loaded via a namespace (and not attached):
+  [1] backports_1.4.1               workflowr_1.7.0              
+  [3] systemfonts_1.0.3             plyr_1.8.6                   
+  [5] lazyeval_0.2.2                BiocParallel_1.26.2          
+  [7] digest_0.6.29                 htmltools_0.5.2              
+  [9] fansi_0.5.0                   memoise_2.0.1                
+ [11] tzdb_0.2.0                    Biostrings_2.60.2            
+ [13] modelr_0.1.8                  matrixStats_0.61.0           
+ [15] svglite_2.0.0                 prettyunits_1.1.1            
+ [17] colorspace_2.0-2              blob_1.2.2                   
+ [19] rvest_1.0.2                   rappdirs_0.3.3               
+ [21] haven_2.4.3                   xfun_0.29                    
+ [23] crayon_1.4.2                  RCurl_1.98-1.5               
+ [25] jsonlite_1.7.3                glue_1.4.2                   
+ [27] gtable_0.3.0                  zlibbioc_1.38.0              
+ [29] XVector_0.32.0                webshot_0.5.2                
+ [31] DelayedArray_0.18.0           car_3.0-12                   
+ [33] abind_1.4-5                   DBI_1.1.2                    
+ [35] rstatix_0.7.0                 Rcpp_1.0.8                   
+ [37] viridisLite_0.4.0             xtable_1.8-4                 
+ [39] progress_1.2.2                bit_4.0.4                    
+ [41] httr_1.4.2                    ellipsis_0.3.2               
+ [43] farver_2.1.0                  pkgconfig_2.0.3              
+ [45] XML_3.99-0.8                  sass_0.4.0                   
+ [47] locfit_1.5-9.4                utf8_1.2.1                   
+ [49] labeling_0.4.2                tidyselect_1.1.1             
+ [51] rlang_0.4.11                  later_1.3.0                  
+ [53] munsell_0.5.0                 BiocVersion_3.13.1           
+ [55] cellranger_1.1.0              tools_4.1.0                  
+ [57] cachem_1.0.6                  cli_3.0.0                    
+ [59] generics_0.1.2                RSQLite_2.2.9                
+ [61] broom_0.7.12                  evaluate_0.14                
+ [63] fastmap_1.1.0                 yaml_2.2.2                   
+ [65] knitr_1.37                    bit64_4.0.5                  
+ [67] fs_1.5.2                      KEGGREST_1.32.0              
+ [69] mime_0.12                     xml2_1.3.3                   
+ [71] biomaRt_2.48.3                compiler_4.1.0               
+ [73] rstudioapi_0.13               filelock_1.0.2               
+ [75] curl_4.3.2                    png_0.1-7                    
+ [77] interactiveDisplayBase_1.30.0 ggsignif_0.6.3               
+ [79] reprex_2.0.1                  bslib_0.3.1                  
+ [81] stringi_1.7.6                 highr_0.9                    
+ [83] lattice_0.20-44               ProtGenerics_1.24.0          
+ [85] Matrix_1.3-3                  vctrs_0.3.8                  
+ [87] pillar_1.6.5                  lifecycle_1.0.1              
+ [89] BiocManager_1.30.16           jquerylib_0.1.4              
+ [91] cowplot_1.1.1                 bitops_1.0-7                 
+ [93] httpuv_1.6.5                  rtracklayer_1.52.1           
+ [95] R6_2.5.1                      BiocIO_1.2.0                 
+ [97] promises_1.2.0.1              gridExtra_2.3                
+ [99] assertthat_0.2.1              SummarizedExperiment_1.22.0  
+[101] rprojroot_2.0.2               rjson_0.2.21                 
+[103] withr_2.4.3                   GenomicAlignments_1.28.0     
+[105] Rsamtools_2.8.0               GenomeInfoDbData_1.2.6       
+[107] hms_1.1.1                     grid_4.1.0                   
+[109] rmarkdown_2.11                MatrixGenerics_1.4.3         
+[111] carData_3.0-5                 git2r_0.29.0                 
+[113] shiny_1.7.1                   lubridate_1.8.0              
+[115] restfulr_0.0.13              </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

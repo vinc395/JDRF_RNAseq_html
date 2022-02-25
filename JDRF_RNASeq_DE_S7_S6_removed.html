@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Vincent Wong" />
+
+
+<title>JDRF : RNA-seq Analysis</title>
+
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">JDRF RNA-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Introduction</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE.html">Initial DE Analysis</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE_RUVseq.html">RUVseq DE</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE_S7_S6_removed.html">DE Analysis without S6 &amp; S7</a>
+</li>
+<li>
+  <a href="JDRF_RNASeq_DE_S7_S6_RUVseq.html">RUVseq DE without S6 &amp; S7</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">JDRF : RNA-seq Analysis</h1>
+<h3 class="subtitle">S7 &amp; S6 removed</h3>
+<h4 class="author">Vincent Wong</h4>
+<h4 class="date">10 February, 2022</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2022-02-10
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>RNAseq/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version 1.7.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges"> <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20220203code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20220203)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20220203code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20220203)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc12bc7e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> c12bc7e </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongc12bc7e" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version c12bc7e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
+
+Untracked files:
+    Untracked:  JDRF_RNASeq_DE.Rmd
+    Untracked:  JDRF_RNASeq_DE_S7_removed.Rmd
+    Untracked:  JDRF_counts.csv
+    Untracked:  RNA-seq(S1-S23)Deseq(coded)240122.xlsx
+    Untracked:  RNAseq(S1-S23)normalizedDeseq.xlsx
+    Untracked:  RNAseq(S1-S23)rawreads.xlsx
+    Untracked:  _site.yml
+    Untracked:  analysis/JDRF_RNASeq_DE.Rmd
+    Untracked:  analysis/JDRF_RNASeq_DE_RUVseq.Rmd
+    Untracked:  analysis/JDRF_RNASeq_DE_S7_S6_RUVseq.Rmd
+    Untracked:  analysis/JDRF_RNASeq_DE_S7_S6_removed.Rmd
+    Untracked:  data/RNAseq(S1-S23)rawreads.xlsx
+    Untracked:  data/dgeList.rds
+    Untracked:  data/dgeList_S6_S7.rds
+    Untracked:  data/sampleInfo.xlsx
+    Untracked:  data/samples.rds
+    Untracked:  data/topTables_efit.rds
+    Untracked:  data/topTables_tfit.rds
+    Untracked:  figure/
+    Untracked:  sampleInfo.xlsx
+
+Unstaged changes:
+    Modified:   analysis/_site.yml
+    Deleted:    analysis/about.Rmd
+    Modified:   analysis/index.Rmd
+    Deleted:    analysis/license.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with <code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<p>First we load all the required <code>R</code> packages</p>
+<pre class="r"><code>library(readxl)
+library(here)
+library(pander)
+library(tidyverse)
+library(magrittr)
+library(AnnotationHub)
+library(ensembldb)
+library(ggpubr)
+library(reshape)
+library(edgeR)
+library(ggrepel)
+library(corrplot)
+library(ggplot2)
+library(scales)
+library(pheatmap)
+library(RColorBrewer)
+library(org.Hs.eg.db)</code></pre>
+<div id="annotations" class="section level2">
+<h2>Annotations</h2>
+<pre class="r"><code>ah &lt;- AnnotationHub() %&gt;%
+    subset(species == &quot;Homo sapiens&quot;) %&gt;%
+    subset(dataprovider == &quot;Ensembl&quot;) %&gt;%
+    subset(genome == &quot;GRCh38&quot;) %&gt;%
+    subset(rdataclass == &quot;EnsDb&quot;)
+ensDb &lt;- ah[[&quot;AH53211&quot;]]</code></pre>
+<pre class="r"><code>grGenes &lt;- genes(ensDb)</code></pre>
+</div>
+<div id="sample-information" class="section level2">
+<h2>Sample information</h2>
+<pre class="r"><code>samples &lt;- read_excel(&quot;sampleInfo.xlsx&quot;) %&gt;%
+  mutate(
+    group = factor(group, levels = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;)))
+
+# groupCols &lt;- samples$Group %&gt;%
+#   levels() %&gt;%
+#   length() %&gt;%
+#   brewer.pal(&quot;Dark2&quot;) %&gt;%
+#   setNames(levels(samples$group))</code></pre>
+</div>
+<div id="count-data" class="section level2">
+<h2>Count Data</h2>
+<p>Load the transcript count table and aggregate to gene level count</p>
+<pre class="r"><code>counts &lt;- read_excel(&quot;RNAseq(S1-S23)rawreads.xlsx&quot;) %&gt;% 
+  dplyr::select(-S7, -S6) %&gt;%
+  column_to_rownames(&quot;Gene&quot;)%&gt;%
+  as.data.frame() %&gt;%
+  round(digits = 0) %&gt;%
+  rownames_to_column(&quot;gene_id&quot;) %&gt;%
+  gather(key = &quot;sample&quot;, value = &quot;Count&quot;, -gene_id) %&gt;%
+  dplyr::filter(Count &gt; 0) %&gt;%
+  left_join(grGenes[,c(&quot;gene_id&quot;, &quot;gene_name&quot;)] %&gt;%
+              mcols() %&gt;%
+              as.data.frame()) %&gt;%
+  group_by(gene_id, sample) %&gt;%
+  summarise(Count = sum(Count)) %&gt;%
+  spread(sample, Count, fill = 0) %&gt;%
+  as.data.frame() %&gt;%
+  column_to_rownames(&quot;gene_id&quot;) </code></pre>
+</div>
+<div id="create-dgelist" class="section level2">
+<h2>Create DGEList</h2>
+<pre class="r"><code>minCPM &lt;- 1
+minSamples &lt;- 5
+
+dgeList &lt;- counts %&gt;%
+  .[rowSums(cpm(.) &gt;= minCPM) &gt;= minSamples,] %&gt;%
+  DGEList(
+    samples = tibble(sample = colnames(.)) %&gt;%
+      left_join(samples),
+    genes = tibble(gene_id = rownames(.)) %&gt;% left_join(grGenes %&gt;% as.data.frame() %&gt;%
+      dplyr::select(
+        chromosome = seqnames, start, end, 
+        gene_id, gene_name, gene_biotype, description, entrezid))) %&gt;%
+  # .[grepl(&quot;protein_coding&quot;, .$genes$gene_biotype),] %&gt;%
+  # .[!grepl(&quot;rRNA&quot;, .$genes$gene_biotype),] %&gt;%
+  # .[!grepl(&quot;lncRNA&quot;, .$genes$gene_biotype),] %&gt;%
+  calcNormFactors()</code></pre>
+</div>
+<div id="filtering-of-low-express-genes" class="section level2">
+<h2>Filtering of low-express genes</h2>
+<p>Count data as provided by Wilson, was loaded and formed into a <code>DGEList</code> object. During this process, genes were removed if:</p>
+<ul>
+<li><p>They were not considered as detectable (CPM &lt; 1 in at least 5 samples). This translates to &gt; 6 reads assigned a gene in all samples from one or more of the genotype groups</p></li>
+<li><p>These filtering steps returned counts for 24,342 genes from 53284`, with total library sizes between <em>5,934,559</em> and <em>35,836,448</em> reads assigned to genes.</p></li>
+</ul>
+<pre class="r"><code>keepTheseGenes &lt;- (rowSums(cpm(counts) &gt; minCPM) &gt;= minSamples) 
+
+## Compare the density distributions before and after filtering
+BeforeFilt &lt;- counts %&gt;%
+cpm(log = TRUE) %&gt;%
+  as.data.frame() %&gt;%
+  pivot_longer(
+    cols = everything(),
+    names_to = &quot;sample&quot;,
+    values_to = &quot;logCPM&quot;) %&gt;%
+  split(f = .$sample) %&gt;%
+  lapply(function(x){
+    d &lt;- density(x$logCPM)
+    tibble(sample = unique(x$sample),
+           x = d$x,y = d$y)}) %&gt;%
+  bind_rows() %&gt;%
+  left_join(samples) %&gt;%
+  ggplot(aes(x, y, colour = group, group = sample)) +
+  geom_line() +
+  ggtitle(&quot;A. Before filtering&quot;, subtitle = paste0(nrow(counts), &quot; genes&quot;)) +
+  scale_colour_manual(values =  brewer.pal(8,&quot;Set1&quot;)) + 
+  labs(x = &quot;logCPM&quot;, y = &quot;Density&quot;, colour = &quot;Group&quot;)
+
+AfterFilt&lt;-dgeList %&gt;%
+cpm(log = TRUE) %&gt;%
+  as.data.frame() %&gt;%
+  pivot_longer(
+    cols = everything(),
+    names_to = &quot;sample&quot;,
+    values_to = &quot;logCPM&quot;) %&gt;%
+  split(f = .$sample) %&gt;%
+  lapply(function(x){
+    d &lt;- density(x$logCPM)
+    tibble(sample = unique(x$sample),
+           x = d$x,y = d$y)}) %&gt;%
+  bind_rows() %&gt;%
+  left_join(samples) %&gt;%
+  ggplot(aes(x, y, colour = group, group = sample)) +
+  geom_line() +
+  ggtitle(&quot;B. After filtering&quot;, subtitle = paste0(table(keepTheseGenes)[[2]], &quot; genes&quot;))+
+  scale_colour_manual(values =  brewer.pal(8,&quot;Set1&quot;)) + 
+  labs(x = &quot;logCPM&quot;, y = &quot;Density&quot;, colour = &quot;Group&quot;)
+
+CPM_filter_plot &lt;- 
+  ggarrange(BeforeFilt, AfterFilt, 
+            common.legend = TRUE, legend = &quot;right&quot;)
+
+CPM_filter_plot</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/plotDensities-1.png" alt="*Expression density plots for all samples after filtering, showing logCPM values.*" width="960" />
+<p class="caption">
+<em>Expression density plots for all samples after filtering, showing logCPM values.</em>
+</p>
+</div>
+</div>
+<div id="library-size" class="section level2">
+<h2>Library size</h2>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/plotLibSize-1.png" alt="*Library Sizes after removal of undetectable genes. Median library size is shown as the dashed line.*" width="672" />
+<p class="caption">
+<em>Library Sizes after removal of undetectable genes. Median library size is shown as the dashed line.</em>
+</p>
+</div>
+<p>This dataset retained 24,342 genes for DGE analysis.</p>
+</div>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<div id="pca" class="section level2">
+<h2>PCA</h2>
+<div id="annotate-group-on-pca" class="section level3">
+<h3>Annotate group on PCA</h3>
+<pre class="r"><code>pca &lt;- dgeList %&gt;%
+  cpm(log = TRUE) %&gt;%
+  t() %&gt;%
+  prcomp() 
+pcaVars &lt;- percent_format(0.1)(summary(pca)$importance[&quot;Proportion of Variance&quot;,])</code></pre>
+<pre class="r"><code>pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=4.4, show.legend = FALSE, max.overlaps =30) +
+  # stat_ellipse(geom = &quot;polygon&quot;, alpha = 0.1, show.legend = FALSE, aes(fill=group)) +
+  #scale_shape_manual(values=c(15,11,19,17))+ #change shape
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-1-1.png" alt="*PCA 1 &amp; 2 of gene-level counts.*" width="672" />
+<p class="caption">
+<em>PCA 1 &amp; 2 of gene-level counts.</em>
+</p>
+</div>
+<p>As clustering by group is not evident in the initial PC1 vs PC2, I then plot PC2 vs PC3 and PC3 vs PC4. However, there is still no observed clustering.</p>
+</div>
+<div id="annotate-gender-on-pca" class="section level3">
+<h3>Annotate gender on PCA</h3>
+<pre class="r"><code>pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = gender)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=4.4, show.legend = FALSE, max.overlaps =30) +
+  # stat_ellipse(geom = &quot;polygon&quot;, alpha = 0.1, show.legend = FALSE, aes(fill=group)) +
+  #scale_shape_manual(values=c(15,11,19,17))+ #change shape
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set2&quot;)) +
+  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-2-1.png" alt="*Annotated Gender on PCA 1 &amp; 2.*" width="672" />
+<p class="caption">
+<em>Annotated Gender on PCA 1 &amp; 2.</em>
+</p>
+</div>
+</div>
+<div id="annotate-age-on-pca" class="section level3">
+<h3>Annotate age on PCA</h3>
+<pre class="r"><code>pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = age)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=4.4, show.legend = FALSE, max.overlaps =30) +
+  # stat_ellipse(geom = &quot;polygon&quot;, alpha = 0.1, show.legend = FALSE, aes(fill=group)) +
+  #scale_shape_manual(values=c(15,11,19,17))+ #change shape
+  scale_color_gradient(low = &quot;orange&quot;,  high = &quot;mediumblue&quot;, space = &quot;Lab&quot;)</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-3-1.png" alt="*Annotated age on PCA 1 &amp; 2.*" width="672" />
+<p class="caption">
+<em>Annotated age on PCA 1 &amp; 2.</em>
+</p>
+</div>
+<pre class="r"><code>  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)</code></pre>
+<pre><code>$x
+[1] &quot;PC1 (17.2%)&quot;
+
+$y
+[1] &quot;PC2 (12.1%)&quot;
+
+$colour
+[1] &quot;Group&quot;
+
+attr(,&quot;class&quot;)
+[1] &quot;labels&quot;</code></pre>
+</div>
+<div id="annotate-group-on-pca1-4" class="section level3">
+<h3>Annotate group on PCA1-4</h3>
+<pre class="r"><code>pca12 &lt;-pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC1, PC2) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC1, y=PC2, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=3.5, show.legend = FALSE, max.overlaps =30) +
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC1 (&quot;, pcaVars[[&quot;PC1&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;) 
+
+pca23 &lt;-pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC2, PC3) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC2, y=PC3, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=3.5, show.legend = FALSE, max.overlaps =30) +
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC2 (&quot;, pcaVars[[&quot;PC2&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC3 (&quot;, pcaVars[[&quot;PC3&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)
+
+pca34 &lt;-pca$x %&gt;%
+  as.data.frame() %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  as_tibble() %&gt;%
+  dplyr::select(sample, PC3, PC4) %&gt;%
+  left_join(dgeList$samples,&quot;sample&quot;) %&gt;%
+  ggplot(aes(x=PC3, y=PC4, colour = group)) +
+  geom_point(alpha = 0.7, size = 2) +
+  geom_text_repel(aes(label = sample), size=3.5, show.legend = FALSE, max.overlaps =30) +
+  scale_colour_manual(
+    values = brewer.pal(8,&quot;Set1&quot;)) +
+  labs(
+    x = paste0(&quot;PC3 (&quot;, pcaVars[[&quot;PC3&quot;]], &quot;)&quot;),
+    y = paste0(&quot;PC4 (&quot;, pcaVars[[&quot;PC4&quot;]], &quot;)&quot;),
+    colour = &quot;Group&quot;)
+
+pca1_4_plot &lt;- ggarrange(pca12, pca23, pca34,
+            common.legend = TRUE, legend = &quot;right&quot;, max.overlaps =100)
+
+pca1_4_plot</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-4-1.png" alt="*PCA 1-4 of gene.*" width="672" />
+<p class="caption">
+<em>PCA 1-4 of gene.</em>
+</p>
+</div>
+<p>A Principal Component Analysis (PCA) was performed using logCPM values from each sample. Samples do not appears to cluster together based on group.</p>
+</div>
+<div id="annotate-gender-on-pca1-4" class="section level3">
+<h3>Annotate gender on PCA1-4</h3>
+<p><img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="annotate-age-on-pca1-4" class="section level3">
+<h3>Annotate age on PCA1-4</h3>
+<p><img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="sample-correlation-plot" class="section level2">
+<h2>Sample Correlation Plot</h2>
+<pre class="r"><code>pca$x %&gt;% set_rownames(dgeList$samples$label) %&gt;% 
+  t() %&gt;%
+  as.data.frame() %&gt;%
+  cor() %&gt;% 
+  # .[1:20,1:20] %&gt;%
+    corrplot(method = &quot;color&quot;, order=&quot;AOE&quot;)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /> Correlation plot shows two distinct groups, require additional information to determine how groups were clustered (eg: age, gender, severity of disease)</p>
+</div>
+</div>
+<div id="differential-gene-expression" class="section level1">
+<h1>Differential Gene Expression</h1>
+<div id="creating-a-design-matrix-and-contrasts" class="section level2">
+<h2>Creating a design matrix and contrasts</h2>
+<pre class="r"><code>design &lt;- model.matrix(~0+group+gender+age, data=dgeList$samples)%&gt;%
+  set_colnames(str_remove(colnames(.), &quot;group&quot;))</code></pre>
+<pre class="r"><code>contr.matrix &lt;- makeContrasts(
+   AvsB = B-A, 
+   BvsC = C-B, 
+   AvsC = C-A,
+   levels = colnames(design))
+contr.matrix</code></pre>
+<pre><code>         Contrasts
+Levels    AvsB BvsC AvsC
+  A         -1    0   -1
+  B          1   -1    0
+  C          0    1    1
+  genderM    0    0    0
+  age        0    0    0</code></pre>
+<pre class="r"><code>pheatmap(
+  design[,c(1:3)], 
+  cluster_cols = FALSE, 
+  cluster_rows = TRUE, 
+  color = c(&quot;white&quot;, &quot;grey50&quot;),
+  annotation_row = dgeList$samples[&quot;group&quot;],
+  annotation_colors = list(condition = brewer.pal(8,&quot;Set1&quot;)),
+  legend = FALSE
+)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="estimation-of-sample-weights" class="section level2">
+<h2>Estimation of sample weights</h2>
+<p>The approach taken for DGE analysis was to use voom-precision weights in order to allow for modelling using Normally distributed data. Since there were no covariates to my model matrix and initial PCA looks like there is sample heterogeneity I decided to run <code>voomWithQualityWeights</code> to incorporate sample-level weights. Sample-level weights were estimated as part of this process, with all samples normally being considered as belonging to the same treatment group, to allow more conservative estimates.</p>
+<pre class="r"><code>#Sample weights after voom transformation
+v &lt;- voomWithQualityWeights(dgeList, design=design, plot=FALSE)</code></pre>
+<p>Means (x-axis) and variances (y-axis) of each gene are plotted to show the dependence between the two before voom is applied to the data (left panel) and how the trend is removed after voom precision weights are applied to the data (right panel)</p>
+<pre class="r"><code>par(mfrow=c(1,2))
+v2 &lt;- voom(dgeList, design, plot=TRUE)
+v2fit &lt;-lmFit(v2, design)
+e2fit &lt;-eBayes(v2fit)
+plotSA(e2fit, main=&quot;Final model: Mean-variance trend&quot;)</code></pre>
+<p><img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Sample weights after voom transformation</p>
+<pre class="r"><code>targets &lt;-v$targets
+
+targets %&gt;% 
+    ggplot(aes(label, sample.weights)) +
+    geom_bar(stat = &quot;identity&quot;, aes(fill=group)) +
+    geom_hline(yintercept = 1, linetype = 2, colour = &quot;grey50&quot;) +
+    scale_y_continuous(expand = expand_scale(c(0, 0.05))) +
+    scale_fill_manual(values = brewer.pal(8,&quot;Set1&quot;)) +
+    facet_grid(~ group, scales = &quot;free_x&quot;, space=&quot;free&quot;) +
+    labs(x = &quot;Sample&quot;, y = &quot;Sample Weight&quot;, fill = &quot;Group&quot;) +
+    theme(axis.text.x = element_text(angle = 90),
+          strip.text = element_text(face=&quot;bold&quot;))</code></pre>
+<div class="figure" style="text-align: center">
+<img src="figure/JDRF_RNASeq_DE_S7_S6_removed.Rmd/plotWeights-1.png" alt="*Sample weights after voom transformation. The idealised equal weighting of $w = 1$ is shown as the dashed line.*" width="672" />
+<p class="caption">
+<em>Sample weights after voom transformation. The idealised equal weighting of <span class="math inline">\(w = 1\)</span> is shown as the dashed line.</em>
+</p>
+</div>
+</div>
+<div id="strict-comparison-between-groups" class="section level2">
+<h2>Strict Comparison between groups</h2>
+<pre class="r"><code>tau &lt;- log2(1.1) #less stringent here</code></pre>
+<p>For the comparison between groups, a null hypothesis was tested using a range of values, instead of the point value zero, i.e.</p>
+<p><span class="math display">\[
+H_0: -\tau &lt; \Delta \mu &lt; \tau  \\
+Vs.  \\
+H_A: | \Delta \mu | &gt; \tau
+\]</span></p>
+<p>The default value used in the function <code>treat()</code> is <span class="math inline">\(\tau = \log_2 1.1\)</span> and for this analysis, <span class="math inline">\(\tau = \log_2 1.1\)</span> was chosen as a suitable value.</p>
+<pre class="r"><code>alpha &lt;- 0.05
+
+tfit &lt;- lmFit(v,design) %&gt;% 
+  contrasts.fit(contr.matrix) %&gt;%
+  treat(lfc = tau)
+
+efit &lt;- lmFit(v,design) %&gt;% 
+  contrasts.fit(contr.matrix) %&gt;%
+  eBayes()</code></pre>
+<p>This gave the number of genes considered as DE between the comparison groups with Bonferroni adjusted P-value &lt; 0.05.</p>
+<pre class="r"><code>summary(decideTests(tfit))</code></pre>
+<pre><code>        AvsB  BvsC  AvsC
+Down       0     0     1
+NotSig 24342 24342 24341
+Up         0     0     0</code></pre>
+<p>For a less strict definition on significance, requirement of log-fold-changes is removed and uses empirical Bayes moderated t-statistics but there were still no DE</p>
+<pre class="r"><code>summary(decideTests(efit))</code></pre>
+<pre><code>        AvsB  BvsC  AvsC
+Down       0     0     1
+NotSig 24342 24342 24341
+Up         0     0     0</code></pre>
+</div>
+<div id="top-de-genes-without-lfc-cutoff" class="section level2">
+<h2>Top DE genes without lfc cutoff</h2>
+<pre class="r"><code>topTables_efit &lt;- colnames(contr.matrix) %&gt;%
+  sapply(function(x){
+  topTreat(efit, coef = x, n = Inf) %&gt;%
+      as_tibble() %&gt;%
+      rownames_to_column(&quot;No.&quot;) %&gt;%
+      arrange(P.Value) %&gt;% 
+      mutate(DE= adj.P.Val &lt; alpha,
+             Status = case_when(
+      DE ==TRUE &amp; logFC &lt; 0 ~ &quot;Down&quot;,
+      DE == TRUE &amp; logFC &gt; 0 ~ &quot;Up&quot;),
+      Status = ifelse(is.na(Status), &quot;NotSig&quot;, Status))}, simplify = FALSE)</code></pre>
+<pre class="r"><code>head(topTables_efit$AvsB, n=10) %&gt;% dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% pander(caption=&quot;AvsB&quot;, n=10)</code></pre>
+<table style="width:100%;">
+<caption>AvsB (continued below)</caption>
+<colgroup>
+<col width="14%" />
+<col width="30%" />
+<col width="12%" />
+<col width="12%" />
+<col width="14%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">gene_name</th>
+<th align="center">gene_biotype</th>
+<th align="center">logFC</th>
+<th align="center">AveExpr</th>
+<th align="center">P.Value</th>
+<th align="center">adj.P.Val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">DPY19L1P1</td>
+<td align="center">unprocessed_pseudogene</td>
+<td align="center">2.359</td>
+<td align="center">1.385</td>
+<td align="center">1.262e-05</td>
+<td align="center">0.3073</td>
+</tr>
+<tr class="even">
+<td align="center">ESPN</td>
+<td align="center">protein_coding</td>
+<td align="center">1.249</td>
+<td align="center">2.05</td>
+<td align="center">3.695e-05</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="odd">
+<td align="center">SCARNA10</td>
+<td align="center">snoRNA</td>
+<td align="center">-0.6823</td>
+<td align="center">8.29</td>
+<td align="center">4.811e-05</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="even">
+<td align="center">ORMDL1</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.4917</td>
+<td align="center">6.505</td>
+<td align="center">6.126e-05</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="odd">
+<td align="center">TMEM243</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.4798</td>
+<td align="center">6.826</td>
+<td align="center">8.629e-05</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="even">
+<td align="center">SOCS4</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.4576</td>
+<td align="center">6.016</td>
+<td align="center">9.419e-05</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="odd">
+<td align="center">NEPRO</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.5427</td>
+<td align="center">6.093</td>
+<td align="center">9.688e-05</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="even">
+<td align="center">BCCIP</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.4975</td>
+<td align="center">5.713</td>
+<td align="center">0.0001256</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="odd">
+<td align="center">BRD9P2</td>
+<td align="center">unprocessed_pseudogene</td>
+<td align="center">1.234</td>
+<td align="center">1.245</td>
+<td align="center">0.0001504</td>
+<td align="center">0.3086</td>
+</tr>
+<tr class="even">
+<td align="center">MICAL1</td>
+<td align="center">protein_coding</td>
+<td align="center">0.3816</td>
+<td align="center">7.164</td>
+<td align="center">0.0001514</td>
+<td align="center">0.3086</td>
+</tr>
+</tbody>
+</table>
+<table style="width:12%;">
+<colgroup>
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>head(topTables_efit$BvsC, n=10) %&gt;% dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% pander(caption=&quot;BvsC&quot;)</code></pre>
+<table>
+<caption>BvsC (continued below)</caption>
+<colgroup>
+<col width="21%" />
+<col width="50%" />
+<col width="13%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">gene_name</th>
+<th align="center">gene_biotype</th>
+<th align="center">logFC</th>
+<th align="center">AveExpr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">AC068831.15</td>
+<td align="center">antisense</td>
+<td align="center">-1.1</td>
+<td align="center">2.17</td>
+</tr>
+<tr class="even">
+<td align="center">NAPRT</td>
+<td align="center">protein_coding</td>
+<td align="center">-2.306</td>
+<td align="center">2.374</td>
+</tr>
+<tr class="odd">
+<td align="center">PID1</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.298</td>
+<td align="center">5.257</td>
+</tr>
+<tr class="even">
+<td align="center">TRAT1</td>
+<td align="center">protein_coding</td>
+<td align="center">0.5688</td>
+<td align="center">6.749</td>
+</tr>
+<tr class="odd">
+<td align="center">HLA-J</td>
+<td align="center">transcribed_unprocessed_pseudogene</td>
+<td align="center">-2.689</td>
+<td align="center">2.736</td>
+</tr>
+<tr class="even">
+<td align="center">PPIAP2</td>
+<td align="center">processed_pseudogene</td>
+<td align="center">-3.436</td>
+<td align="center">-1.052</td>
+</tr>
+<tr class="odd">
+<td align="center">WISP3</td>
+<td align="center">protein_coding</td>
+<td align="center">1.292</td>
+<td align="center">1.411</td>
+</tr>
+<tr class="even">
+<td align="center">WDSUB1</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.478</td>
+<td align="center">2.348</td>
+</tr>
+<tr class="odd">
+<td align="center">PPIP5K1</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.7288</td>
+<td align="center">3.68</td>
+</tr>
+<tr class="even">
+<td align="center">CTD-2532D12.4</td>
+<td align="center">lincRNA</td>
+<td align="center">-3.708</td>
+<td align="center">-0.9337</td>
+</tr>
+</tbody>
+</table>
+<table style="width:46%;">
+<colgroup>
+<col width="16%" />
+<col width="16%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">P.Value</th>
+<th align="center">adj.P.Val</th>
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">6.883e-05</td>
+<td align="center">0.758</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0001033</td>
+<td align="center">0.758</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0001114</td>
+<td align="center">0.758</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0001383</td>
+<td align="center">0.758</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.000161</td>
+<td align="center">0.758</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0001868</td>
+<td align="center">0.758</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.000241</td>
+<td align="center">0.828</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.000278</td>
+<td align="center">0.828</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0003231</td>
+<td align="center">0.828</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0003402</td>
+<td align="center">0.828</td>
+<td align="center">NotSig</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>head(topTables_efit$AvsC, n=10) %&gt;% dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% pander(caption=&quot;AvsC&quot;)</code></pre>
+<table>
+<caption>AvsC (continued below)</caption>
+<colgroup>
+<col width="15%" />
+<col width="29%" />
+<col width="12%" />
+<col width="12%" />
+<col width="15%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">gene_name</th>
+<th align="center">gene_biotype</th>
+<th align="center">logFC</th>
+<th align="center">AveExpr</th>
+<th align="center">P.Value</th>
+<th align="center">adj.P.Val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">WDSUB1</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.902</td>
+<td align="center">2.348</td>
+<td align="center">8.901e-07</td>
+<td align="center">0.02167</td>
+</tr>
+<tr class="even">
+<td align="center">UST</td>
+<td align="center">protein_coding</td>
+<td align="center">1.231</td>
+<td align="center">4.137</td>
+<td align="center">9.559e-05</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="odd">
+<td align="center">PPIAP2</td>
+<td align="center">processed_pseudogene</td>
+<td align="center">-3.054</td>
+<td align="center">-1.052</td>
+<td align="center">0.0002519</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="even">
+<td align="center">TEX101</td>
+<td align="center">protein_coding</td>
+<td align="center">-2.363</td>
+<td align="center">0.6221</td>
+<td align="center">0.0003446</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="odd">
+<td align="center">SCARNA10</td>
+<td align="center">snoRNA</td>
+<td align="center">-0.5156</td>
+<td align="center">8.29</td>
+<td align="center">0.0003811</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="even">
+<td align="center">SNORA67</td>
+<td align="center">snoRNA</td>
+<td align="center">-1.385</td>
+<td align="center">2.172</td>
+<td align="center">0.0004082</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="odd">
+<td align="center">KRT1</td>
+<td align="center">protein_coding</td>
+<td align="center">-4.182</td>
+<td align="center">-3.114</td>
+<td align="center">0.000416</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="even">
+<td align="center">ZDHHC11B</td>
+<td align="center">protein_coding</td>
+<td align="center">1.496</td>
+<td align="center">2.422</td>
+<td align="center">0.0004254</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="odd">
+<td align="center">ADTRP</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.164</td>
+<td align="center">4.811</td>
+<td align="center">0.0005256</td>
+<td align="center">0.9999</td>
+</tr>
+<tr class="even">
+<td align="center">LPAR5</td>
+<td align="center">protein_coding</td>
+<td align="center">0.793</td>
+<td align="center">3.061</td>
+<td align="center">0.0006141</td>
+<td align="center">0.9999</td>
+</tr>
+</tbody>
+</table>
+<table style="width:12%;">
+<colgroup>
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Down</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="top-de-genes-with-log21.1" class="section level2">
+<h2>Top DE genes with log2(1.1)</h2>
+<pre class="r"><code>topTables_tfit &lt;- colnames(contr.matrix) %&gt;%
+  sapply(function(x){
+  topTreat(tfit, coef = x, n = Inf) %&gt;%
+      as_tibble() %&gt;%
+      rownames_to_column(&quot;No.&quot;) %&gt;%
+      arrange(P.Value) %&gt;% 
+      mutate(DE= adj.P.Val &lt; alpha,
+             Status = case_when(
+      DE ==TRUE &amp; logFC &lt; 0 ~ &quot;Down&quot;,
+      DE == TRUE &amp; logFC &gt; 0 ~ &quot;Up&quot;),
+      Status = ifelse(is.na(Status), &quot;NotSig&quot;, Status))}, simplify = FALSE)</code></pre>
+<pre class="r"><code>head(topTables_tfit$AvsB, n=10) %&gt;% dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% pander(caption=&quot;AvsB&quot;)</code></pre>
+<table>
+<caption>AvsB (continued below)</caption>
+<colgroup>
+<col width="19%" />
+<col width="40%" />
+<col width="12%" />
+<col width="12%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">gene_name</th>
+<th align="center">gene_biotype</th>
+<th align="center">logFC</th>
+<th align="center">AveExpr</th>
+<th align="center">P.Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">DPY19L1P1</td>
+<td align="center">unprocessed_pseudogene</td>
+<td align="center">2.359</td>
+<td align="center">1.385</td>
+<td align="center">1.667e-05</td>
+</tr>
+<tr class="even">
+<td align="center">ESPN</td>
+<td align="center">protein_coding</td>
+<td align="center">1.249</td>
+<td align="center">2.05</td>
+<td align="center">7.782e-05</td>
+</tr>
+<tr class="odd">
+<td align="center">BRD9P2</td>
+<td align="center">unprocessed_pseudogene</td>
+<td align="center">1.234</td>
+<td align="center">1.245</td>
+<td align="center">0.0002824</td>
+</tr>
+<tr class="even">
+<td align="center">SCARNA10</td>
+<td align="center">snoRNA</td>
+<td align="center">-0.6823</td>
+<td align="center">8.29</td>
+<td align="center">0.0002871</td>
+</tr>
+<tr class="odd">
+<td align="center">ATP5J</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.213</td>
+<td align="center">2.061</td>
+<td align="center">0.0003619</td>
+</tr>
+<tr class="even">
+<td align="center">ZNF22</td>
+<td align="center">protein_coding</td>
+<td align="center">-0.9353</td>
+<td align="center">2.369</td>
+<td align="center">0.0004302</td>
+</tr>
+<tr class="odd">
+<td align="center">OACYLP</td>
+<td align="center">transcribed_unitary_pseudogene</td>
+<td align="center">2.045</td>
+<td align="center">-0.1991</td>
+<td align="center">0.0004703</td>
+</tr>
+<tr class="even">
+<td align="center">XXYLT1</td>
+<td align="center">protein_coding</td>
+<td align="center">1.024</td>
+<td align="center">3.591</td>
+<td align="center">0.0004857</td>
+</tr>
+<tr class="odd">
+<td align="center">EGR1</td>
+<td align="center">protein_coding</td>
+<td align="center">1.93</td>
+<td align="center">3.849</td>
+<td align="center">0.0006399</td>
+</tr>
+<tr class="even">
+<td align="center">RP11-180C16.1</td>
+<td align="center">antisense</td>
+<td align="center">1.307</td>
+<td align="center">2.48</td>
+<td align="center">0.0006795</td>
+</tr>
+</tbody>
+</table>
+<table style="width:29%;">
+<colgroup>
+<col width="16%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">adj.P.Val</th>
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">0.4058</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.9381</td>
+<td align="center">NotSig</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>head(topTables_tfit$BvsC, n=10) %&gt;% dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% pander(caption=&quot;BvsC&quot;)</code></pre>
+<table>
+<caption>BvsC (continued below)</caption>
+<colgroup>
+<col width="22%" />
+<col width="51%" />
+<col width="12%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">gene_name</th>
+<th align="center">gene_biotype</th>
+<th align="center">logFC</th>
+<th align="center">AveExpr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">NAPRT</td>
+<td align="center">protein_coding</td>
+<td align="center">-2.306</td>
+<td align="center">2.374</td>
+</tr>
+<tr class="even">
+<td align="center">AC068831.15</td>
+<td align="center">antisense</td>
+<td align="center">-1.1</td>
+<td align="center">2.17</td>
+</tr>
+<tr class="odd">
+<td align="center">HLA-J</td>
+<td align="center">transcribed_unprocessed_pseudogene</td>
+<td align="center">-2.689</td>
+<td align="center">2.736</td>
+</tr>
+<tr class="even">
+<td align="center">PID1</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.298</td>
+<td align="center">5.257</td>
+</tr>
+<tr class="odd">
+<td align="center">PPIAP2</td>
+<td align="center">processed_pseudogene</td>
+<td align="center">-3.436</td>
+<td align="center">-1.052</td>
+</tr>
+<tr class="even">
+<td align="center">CTD-2532D12.4</td>
+<td align="center">lincRNA</td>
+<td align="center">-3.708</td>
+<td align="center">-0.9337</td>
+</tr>
+<tr class="odd">
+<td align="center">WISP3</td>
+<td align="center">protein_coding</td>
+<td align="center">1.292</td>
+<td align="center">1.411</td>
+</tr>
+<tr class="even">
+<td align="center">WDSUB1</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.478</td>
+<td align="center">2.348</td>
+</tr>
+<tr class="odd">
+<td align="center">RP11-493L12.5</td>
+<td align="center">lincRNA</td>
+<td align="center">-2.894</td>
+<td align="center">0.112</td>
+</tr>
+<tr class="even">
+<td align="center">C4orf50</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.771</td>
+<td align="center">2.416</td>
+</tr>
+</tbody>
+</table>
+<table style="width:46%;">
+<colgroup>
+<col width="16%" />
+<col width="16%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">P.Value</th>
+<th align="center">adj.P.Val</th>
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">0.0001286</td>
+<td align="center">0.9983</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0001604</td>
+<td align="center">0.9983</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0001876</td>
+<td align="center">0.9983</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.000204</td>
+<td align="center">0.9983</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0002051</td>
+<td align="center">0.9983</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0003654</td>
+<td align="center">0.9998</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0004139</td>
+<td align="center">0.9998</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0004223</td>
+<td align="center">0.9998</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">0.0004966</td>
+<td align="center">0.9998</td>
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">0.0005261</td>
+<td align="center">0.9998</td>
+<td align="center">NotSig</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>head(topTables_tfit$AvsC, n=10) %&gt;% dplyr::select (gene_name, gene_biotype, logFC, AveExpr, P.Value, adj.P.Val, Status) %&gt;% pander(caption=&quot;AvsC&quot;)</code></pre>
+<table>
+<caption>AvsC (continued below)</caption>
+<colgroup>
+<col width="15%" />
+<col width="29%" />
+<col width="11%" />
+<col width="12%" />
+<col width="15%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">gene_name</th>
+<th align="center">gene_biotype</th>
+<th align="center">logFC</th>
+<th align="center">AveExpr</th>
+<th align="center">P.Value</th>
+<th align="center">adj.P.Val</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">WDSUB1</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.902</td>
+<td align="center">2.348</td>
+<td align="center">1.497e-06</td>
+<td align="center">0.03643</td>
+</tr>
+<tr class="even">
+<td align="center">UST</td>
+<td align="center">protein_coding</td>
+<td align="center">1.231</td>
+<td align="center">4.137</td>
+<td align="center">0.0001878</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">PPIAP2</td>
+<td align="center">processed_pseudogene</td>
+<td align="center">-3.054</td>
+<td align="center">-1.052</td>
+<td align="center">0.0002813</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">TEX101</td>
+<td align="center">protein_coding</td>
+<td align="center">-2.363</td>
+<td align="center">0.6221</td>
+<td align="center">0.0004085</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">KRT1</td>
+<td align="center">protein_coding</td>
+<td align="center">-4.182</td>
+<td align="center">-3.114</td>
+<td align="center">0.0004392</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">ZDHHC11B</td>
+<td align="center">protein_coding</td>
+<td align="center">1.496</td>
+<td align="center">2.422</td>
+<td align="center">0.000621</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">SNORA67</td>
+<td align="center">snoRNA</td>
+<td align="center">-1.385</td>
+<td align="center">2.172</td>
+<td align="center">0.0006317</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">ADTRP</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.164</td>
+<td align="center">4.811</td>
+<td align="center">0.0009212</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">NAPRT</td>
+<td align="center">protein_coding</td>
+<td align="center">-1.691</td>
+<td align="center">2.374</td>
+<td align="center">0.001005</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">UPK3BL</td>
+<td align="center">protein_coding</td>
+<td align="center">0.915</td>
+<td align="center">3.296</td>
+<td align="center">0.001386</td>
+<td align="center">1</td>
+</tr>
+</tbody>
+</table>
+<table style="width:12%;">
+<colgroup>
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">Down</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+<tr class="odd">
+<td align="center">NotSig</td>
+</tr>
+<tr class="even">
+<td align="center">NotSig</td>
+</tr>
+</tbody>
+</table>
+<p>Next we could try <code>RUVSeq</code> package to adjust for unwanted technical effects that may be present in these data with the use of empirical controls (eg: spike-in / housekeeping genes) that do not change across conditions. This need to be done cautiously with a very low <code>k</code> value to minimize the chance of removing biologically meaningful variation.</p>
+</div>
+</div>
+<div id="export-data" class="section level1">
+<h1>Export Data</h1>
+<pre class="r"><code>dgeList %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;dgeList_S6_S7.rds&quot;))
+topTables_tfit %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;topTables_tfit_S6_S7.rds&quot;))
+topTables_efit %&gt;% 
+  saveRDS(here(&quot;data&quot;, &quot;topTables_efit_S6_S7.rds&quot;))</code></pre>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows Server x64 (build 14393)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_Australia.1252  LC_CTYPE=English_Australia.1252   
+[3] LC_MONETARY=English_Australia.1252 LC_NUMERIC=C                      
+[5] LC_TIME=English_Australia.1252    
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] org.Hs.eg.db_3.13.0     RColorBrewer_1.1-2      pheatmap_1.0.12        
+ [4] scales_1.1.1            corrplot_0.92           ggrepel_0.9.1          
+ [7] edgeR_3.34.1            limma_3.48.0            reshape_0.8.8          
+[10] ggpubr_0.4.0.999        ensembldb_2.16.4        AnnotationFilter_1.16.0
+[13] GenomicFeatures_1.44.2  AnnotationDbi_1.54.1    Biobase_2.52.0         
+[16] GenomicRanges_1.44.0    GenomeInfoDb_1.28.4     IRanges_2.26.0         
+[19] S4Vectors_0.30.0        AnnotationHub_3.0.1     BiocFileCache_2.0.0    
+[22] dbplyr_2.1.1            BiocGenerics_0.38.0     magrittr_2.0.1         
+[25] forcats_0.5.1           stringr_1.4.0           dplyr_1.0.6            
+[28] purrr_0.3.4             readr_2.0.2             tidyr_1.1.4            
+[31] tibble_3.1.2            ggplot2_3.3.5           tidyverse_1.3.1        
+[34] pander_0.6.4            here_1.0.1              readxl_1.3.1           
+
+loaded via a namespace (and not attached):
+  [1] backports_1.4.1               workflowr_1.7.0              
+  [3] plyr_1.8.6                    lazyeval_0.2.2               
+  [5] BiocParallel_1.26.2           digest_0.6.29                
+  [7] htmltools_0.5.2               fansi_0.5.0                  
+  [9] memoise_2.0.1                 tzdb_0.2.0                   
+ [11] Biostrings_2.60.2             modelr_0.1.8                 
+ [13] matrixStats_0.61.0            prettyunits_1.1.1            
+ [15] colorspace_2.0-2              blob_1.2.2                   
+ [17] rvest_1.0.2                   rappdirs_0.3.3               
+ [19] haven_2.4.3                   xfun_0.29                    
+ [21] crayon_1.4.2                  RCurl_1.98-1.5               
+ [23] jsonlite_1.7.3                glue_1.4.2                   
+ [25] gtable_0.3.0                  zlibbioc_1.38.0              
+ [27] XVector_0.32.0                DelayedArray_0.18.0          
+ [29] car_3.0-12                    abind_1.4-5                  
+ [31] DBI_1.1.2                     rstatix_0.7.0                
+ [33] Rcpp_1.0.8                    xtable_1.8-4                 
+ [35] progress_1.2.2                bit_4.0.4                    
+ [37] httr_1.4.2                    ellipsis_0.3.2               
+ [39] farver_2.1.0                  pkgconfig_2.0.3              
+ [41] XML_3.99-0.8                  sass_0.4.0                   
+ [43] locfit_1.5-9.4                utf8_1.2.1                   
+ [45] labeling_0.4.2                tidyselect_1.1.1             
+ [47] rlang_0.4.11                  later_1.3.0                  
+ [49] munsell_0.5.0                 BiocVersion_3.13.1           
+ [51] cellranger_1.1.0              tools_4.1.0                  
+ [53] cachem_1.0.6                  cli_3.0.0                    
+ [55] generics_0.1.2                RSQLite_2.2.9                
+ [57] broom_0.7.12                  evaluate_0.14                
+ [59] fastmap_1.1.0                 yaml_2.2.2                   
+ [61] knitr_1.37                    bit64_4.0.5                  
+ [63] fs_1.5.2                      KEGGREST_1.32.0              
+ [65] mime_0.12                     xml2_1.3.3                   
+ [67] biomaRt_2.48.3                compiler_4.1.0               
+ [69] rstudioapi_0.13               filelock_1.0.2               
+ [71] curl_4.3.2                    png_0.1-7                    
+ [73] interactiveDisplayBase_1.30.0 ggsignif_0.6.3               
+ [75] reprex_2.0.1                  bslib_0.3.1                  
+ [77] stringi_1.7.6                 highr_0.9                    
+ [79] lattice_0.20-44               ProtGenerics_1.24.0          
+ [81] Matrix_1.3-3                  vctrs_0.3.8                  
+ [83] pillar_1.6.5                  lifecycle_1.0.1              
+ [85] BiocManager_1.30.16           jquerylib_0.1.4              
+ [87] cowplot_1.1.1                 bitops_1.0-7                 
+ [89] httpuv_1.6.5                  rtracklayer_1.52.1           
+ [91] R6_2.5.1                      BiocIO_1.2.0                 
+ [93] promises_1.2.0.1              gridExtra_2.3                
+ [95] assertthat_0.2.1              SummarizedExperiment_1.22.0  
+ [97] rprojroot_2.0.2               rjson_0.2.21                 
+ [99] withr_2.4.3                   GenomicAlignments_1.28.0     
+[101] Rsamtools_2.8.0               GenomeInfoDbData_1.2.6       
+[103] hms_1.1.1                     grid_4.1.0                   
+[105] rmarkdown_2.11                MatrixGenerics_1.4.3         
+[107] carData_3.0-5                 git2r_0.29.0                 
+[109] shiny_1.7.1                   lubridate_1.8.0              
+[111] restfulr_0.0.13              </code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows Server x64 (build 14393)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_Australia.1252  LC_CTYPE=English_Australia.1252   
+[3] LC_MONETARY=English_Australia.1252 LC_NUMERIC=C                      
+[5] LC_TIME=English_Australia.1252    
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] org.Hs.eg.db_3.13.0     RColorBrewer_1.1-2      pheatmap_1.0.12        
+ [4] scales_1.1.1            corrplot_0.92           ggrepel_0.9.1          
+ [7] edgeR_3.34.1            limma_3.48.0            reshape_0.8.8          
+[10] ggpubr_0.4.0.999        ensembldb_2.16.4        AnnotationFilter_1.16.0
+[13] GenomicFeatures_1.44.2  AnnotationDbi_1.54.1    Biobase_2.52.0         
+[16] GenomicRanges_1.44.0    GenomeInfoDb_1.28.4     IRanges_2.26.0         
+[19] S4Vectors_0.30.0        AnnotationHub_3.0.1     BiocFileCache_2.0.0    
+[22] dbplyr_2.1.1            BiocGenerics_0.38.0     magrittr_2.0.1         
+[25] forcats_0.5.1           stringr_1.4.0           dplyr_1.0.6            
+[28] purrr_0.3.4             readr_2.0.2             tidyr_1.1.4            
+[31] tibble_3.1.2            ggplot2_3.3.5           tidyverse_1.3.1        
+[34] pander_0.6.4            here_1.0.1              readxl_1.3.1           
+
+loaded via a namespace (and not attached):
+  [1] backports_1.4.1               workflowr_1.7.0              
+  [3] plyr_1.8.6                    lazyeval_0.2.2               
+  [5] BiocParallel_1.26.2           digest_0.6.29                
+  [7] htmltools_0.5.2               fansi_0.5.0                  
+  [9] memoise_2.0.1                 tzdb_0.2.0                   
+ [11] Biostrings_2.60.2             modelr_0.1.8                 
+ [13] matrixStats_0.61.0            prettyunits_1.1.1            
+ [15] colorspace_2.0-2              blob_1.2.2                   
+ [17] rvest_1.0.2                   rappdirs_0.3.3               
+ [19] haven_2.4.3                   xfun_0.29                    
+ [21] crayon_1.4.2                  RCurl_1.98-1.5               
+ [23] jsonlite_1.7.3                glue_1.4.2                   
+ [25] gtable_0.3.0                  zlibbioc_1.38.0              
+ [27] XVector_0.32.0                DelayedArray_0.18.0          
+ [29] car_3.0-12                    abind_1.4-5                  
+ [31] DBI_1.1.2                     rstatix_0.7.0                
+ [33] Rcpp_1.0.8                    xtable_1.8-4                 
+ [35] progress_1.2.2                bit_4.0.4                    
+ [37] httr_1.4.2                    ellipsis_0.3.2               
+ [39] farver_2.1.0                  pkgconfig_2.0.3              
+ [41] XML_3.99-0.8                  sass_0.4.0                   
+ [43] locfit_1.5-9.4                utf8_1.2.1                   
+ [45] labeling_0.4.2                tidyselect_1.1.1             
+ [47] rlang_0.4.11                  later_1.3.0                  
+ [49] munsell_0.5.0                 BiocVersion_3.13.1           
+ [51] cellranger_1.1.0              tools_4.1.0                  
+ [53] cachem_1.0.6                  cli_3.0.0                    
+ [55] generics_0.1.2                RSQLite_2.2.9                
+ [57] broom_0.7.12                  evaluate_0.14                
+ [59] fastmap_1.1.0                 yaml_2.2.2                   
+ [61] knitr_1.37                    bit64_4.0.5                  
+ [63] fs_1.5.2                      KEGGREST_1.32.0              
+ [65] mime_0.12                     xml2_1.3.3                   
+ [67] biomaRt_2.48.3                compiler_4.1.0               
+ [69] rstudioapi_0.13               filelock_1.0.2               
+ [71] curl_4.3.2                    png_0.1-7                    
+ [73] interactiveDisplayBase_1.30.0 ggsignif_0.6.3               
+ [75] reprex_2.0.1                  bslib_0.3.1                  
+ [77] stringi_1.7.6                 highr_0.9                    
+ [79] lattice_0.20-44               ProtGenerics_1.24.0          
+ [81] Matrix_1.3-3                  vctrs_0.3.8                  
+ [83] pillar_1.6.5                  lifecycle_1.0.1              
+ [85] BiocManager_1.30.16           jquerylib_0.1.4              
+ [87] cowplot_1.1.1                 bitops_1.0-7                 
+ [89] httpuv_1.6.5                  rtracklayer_1.52.1           
+ [91] R6_2.5.1                      BiocIO_1.2.0                 
+ [93] promises_1.2.0.1              gridExtra_2.3                
+ [95] assertthat_0.2.1              SummarizedExperiment_1.22.0  
+ [97] rprojroot_2.0.2               rjson_0.2.21                 
+ [99] withr_2.4.3                   GenomicAlignments_1.28.0     
+[101] Rsamtools_2.8.0               GenomeInfoDbData_1.2.6       
+[103] hms_1.1.1                     grid_4.1.0                   
+[105] rmarkdown_2.11                MatrixGenerics_1.4.3         
+[107] carData_3.0-5                 git2r_0.29.0                 
+[109] shiny_1.7.1                   lubridate_1.8.0              
+[111] restfulr_0.0.13              </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
